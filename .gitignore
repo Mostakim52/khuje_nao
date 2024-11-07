@@ -43,8 +43,5 @@ app.*.map.json
 /android/app/release
 
 /ios
-/android
 README.md
 /test
-analysis_options.yaml
-.metadata
