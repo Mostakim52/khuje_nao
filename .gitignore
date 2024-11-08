@@ -43,3 +43,4 @@ app.*.map.json
 
 /ios
 README.md
+.dart_tool
