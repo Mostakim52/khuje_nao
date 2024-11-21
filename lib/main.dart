@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
 
 void main() {
+  NotificationService.initializeNotifications();
   runApp(const MyApp());
 }
 

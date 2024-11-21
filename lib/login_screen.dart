@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,15 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
 
   void _showResponseDialog(String messagediag) {
+
+    //notification example
+    // NotificationService.sendNotification(
+    //   "Hello, I am a notification! You failed a login!",
+    //   "Okay", //button to interact
+    //   "Dismiss", //button to interact
+    // );
+    //
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
