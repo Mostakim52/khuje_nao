@@ -3,6 +3,9 @@ import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
 import 'chat_page.dart'; // Import the ChatPage
+import 'report_found_item_screen.dart'; // Import the Report Found Item Screen
+import 'search_lost_item_screen.dart';  // Import the Search Lost Items Screen
+
 
 void main() {
   NotificationService.initializeNotifications();
@@ -62,6 +65,26 @@ class HomeScreen extends StatelessWidget {
               },
               child: const Text('Temporary Chat'),
             ),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (Context) => ReportFoundItemScreen())  // Navigate to Report Found Item)
+                  );
+                },
+                child: const Text('Report Found Item'),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchLostItemsScreen()), // Navigate to Search Lost Items
+                );
+              },
+              child: const Text('Search Lost Items'),
+            ),
+
           ],
         ),
       ),

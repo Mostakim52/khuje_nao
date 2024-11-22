@@ -103,4 +103,44 @@ class ApiService {
     await storage.delete(key: "jwt_token");
     print("User logged out!");
   }
+
+
+  Future<bool> reportFoundItem({
+    required String description,
+    required String location,
+    required String imagePath,
+  }) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/report-found'));
+      request.fields['description'] = description;
+      request.fields['location'] = location;
+      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+
+      final response = await request.send();
+      return response.statusCode == 201;
+    } catch (e) {
+      print('Error reporting found item: $e');
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> searchLostItems({
+    required String query,
+    required String location,
+  }) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/search-lost?query=$query&location=$location'));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      } else {
+        print('Search failed: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Error searching lost items: $e');
+      return [];
+    }
+  }
+
+
 }
