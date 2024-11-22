@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
+import 'chat_page.dart'; // Import the ChatPage
 
 void main() {
   NotificationService.initializeNotifications();
@@ -51,6 +52,15 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatPage()), // Navigate to ChatPage
+                );
+              },
+              child: const Text('Temporary Chat'),
             ),
           ],
         ),
