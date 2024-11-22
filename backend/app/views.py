@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from .models import UserModel, LostItemModel
+from .models import UserModel, LostItemModel, MessageModel
 
 main_bp = Blueprint("main", __name__)
 
@@ -43,3 +43,20 @@ def activity_feed():
     limit = int(request.args.get("limit", 10))
     feed = LostItemModel.get_recent_feed(limit=limit)
     return jsonify(feed), 200
+
+##Added by Mostakim
+@main_bp.route('/send_message', methods=['POST'])
+def send_message():
+    data = request.json
+    if not data.get("chat_id") or not data.get("text") or not data.get("author_id"):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    message_id = MessageModel.send_message(data)
+    return jsonify({"message_id": message_id}), 201
+
+@main_bp.route('/get_messages/<chat_id>', methods=['GET'])
+def get_messages(chat_id):
+    limit = int(request.args.get("limit", 50))
+    skip = int(request.args.get("skip", 0))
+    messages = MessageModel.get_messages(chat_id, limit=limit, skip=skip)
+    return jsonify(messages), 200
