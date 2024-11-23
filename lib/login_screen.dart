@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
-import 'notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

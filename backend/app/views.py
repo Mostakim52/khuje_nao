@@ -1,19 +1,31 @@
 from flask import Blueprint, request, jsonify
 from .models import UserModel, LostItemModel, MessageModel
+from .utils import hash_password, check_password
 
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/users", methods=["POST"])
 def create_user():
     data = request.get_json()
-    if not data or "username" not in data or "email" not in data:
+    if not data or "username" not in data or "email" not in data or "password" not in data:
         return jsonify({"error": "Invalid data"}), 400
 
     if UserModel.get_user_by_email(data["email"]):
         return jsonify({"error": "User already exists"}), 400
 
-    user_id = UserModel.create_user({"username": data["username"], "email": data["email"]})
+    # Password hashing
+    data["password"] = hash_password(data["password"])
+    user_id = UserModel.create_user({"username": data["username"], "email": data["email"], "password": data["password"]})
     return jsonify({"message": "User created successfully", "id": user_id}), 201
+
+@main_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    user = UserModel.get_user_by_email(data["email"])
+    if not user or not check_password(data["password"], user["password"]):
+        return jsonify({"error": "Invalid email or password"}), 400
+
+    return jsonify({"message": "Login successful", "user_id": str(user["_id"])}), 200
 
 @main_bp.route("/lost-items", methods=["POST"])
 def report_lost_item():
