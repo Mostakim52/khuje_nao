@@ -5,12 +5,24 @@ from bson import ObjectId
 class UserModel:
     @staticmethod
     def create_user(data):
+        # Ensure all required fields are provided
+        required_fields = ["name", "email", "phone_number", "password", "nsu_id"]
+        for field in required_fields:
+            if field not in data or not data[field]:
+                raise ValueError(f"Missing required field: {field}")
+
+        # Insert user into the database
         user_id = mongo.db.users.insert_one(data).inserted_id
         return str(user_id)
 
     @staticmethod
     def get_user_by_email(email):
         return mongo.db.users.find_one({"email": email})
+
+    @staticmethod
+    def get_user_by_nsu_id(nsu_id):
+        return mongo.db.users.find_one({"nsu_id": nsu_id})
+
 
 # Lost Item model for MongoDB operations
 class LostItemModel:

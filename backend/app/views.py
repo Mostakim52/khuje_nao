@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .models import UserModel, LostItemModel, MessageModel
-from .utils import hash_password, check_password
+from .utils import hash_password, check_password, is_valid_phone_number, is_valid_nsu_id
 
 main_bp = Blueprint("main", __name__)
 
@@ -26,6 +26,32 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 400
 
     return jsonify({"message": "Login successful", "user_id": str(user["_id"])}), 200
+
+@main_bp.route("/signup", methods=["POST"])
+def signup():
+    data = request.get_json()
+
+    # Validate input
+    required_fields = ["name", "email", "phone_number", "password", "nsu_id"]
+    if not all(field in data and data[field] for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if not is_valid_phone_number(data["phone_number"]):
+        return jsonify({"error": "Invalid phone number"}), 400
+
+    if not is_valid_nsu_id(data["nsu_id"]):
+        return jsonify({"error": "Invalid NSU ID"}), 400
+
+    if UserModel.get_user_by_email(data["email"]):
+        return jsonify({"error": "Email already exists"}), 400
+
+    if UserModel.get_user_by_nsu_id(data["nsu_id"]):
+        return jsonify({"error": "NSU ID already exists"}), 400
+
+    data["password"] = hash_password(data["password"])
+
+    user_id = UserModel.create_user(data)
+    return jsonify({"message": "User created successfully", "id": user_id}), 201
 
 @main_bp.route("/lost-items", methods=["POST"])
 def report_lost_item():
