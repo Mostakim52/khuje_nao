@@ -65,25 +65,25 @@ class HomeScreen extends StatelessWidget {
               },
               child: const Text('Temporary Chat'),
             ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (Context) => ReportLostItemScreen())  // Navigate to Report Found Item)
-                  );
-                },
-                child: const Text('Report Found Item'),
-            ),
+            // ElevatedButton(
+            //     onPressed: () {
+            //       Navigator.push(
+            //           context,
+            //           MaterialPageRoute(builder: (Context) => ReportLostItemScreen())  // Navigate to Report Found Item)
+            //       );
+            //     },
+            //     child: const Text('Report Found Item'),
+            // ),
 
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SearchLostItemsScreen()), // Navigate to Search Lost Items
-                );
-              },
-              child: const Text('Search Lost Items'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => SearchLostItemsScreen()), // Navigate to Search Lost Items
+            //     );
+            //   },
+            //   child: const Text('Search Lost Items'),
+            // ),
 
           ],
         ),

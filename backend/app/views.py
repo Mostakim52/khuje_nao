@@ -116,7 +116,17 @@ def activity_feed():
     feed = LostItemModel.get_recent_feed(limit=limit)
     return jsonify(feed), 200
 
+
+
+
+
 ##Added by Mostakim
+
+import random
+import time
+import sendgrid
+from sendgrid.helpers.mail import Mail, Email, To, Content
+import os
 @main_bp.route('/send_message', methods=['POST'])
 def send_message():
     data = request.json
@@ -133,3 +143,77 @@ def get_messages():
     skip = int(request.args.get("skip", 0))
     messages = MessageModel.get_messages(data.get("author_id"), data.get("receiver_id"), limit=limit, skip=skip)
     return jsonify(messages), 200
+
+# SendGrid API Client
+sg = sendgrid.SendGridAPIClient(api_key='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')  # Ensure the API key is set
+
+# Temporary storage for OTP (Use a better storage like Redis or a database in production)
+otp_storage = {}
+
+# Generate OTP (6-digit)
+def generate_otp():
+    return random.randint(100000, 999999)
+
+# Send OTP to user's email
+def send_otp_email(to_email, otp):
+    from_email = Email("smartfreelancehub@gmail.com")  # Your email
+    to_email = To(to_email)  # Recipient's email
+    subject = "Your OTP Code"
+    content = Content("text/plain", f"Your OTP code is: {otp}")
+
+    mail = Mail(from_email, to_email, subject, content)
+
+    try:
+        response = sg.send(mail)
+        print(f"Email sent with status code {response.status_code}")
+    except Exception as e:
+        print(str(e))
+
+# Route to send OTP to email
+@main_bp.route('/send_otp', methods=['POST'])
+def send_otp():
+    data = request.json
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    otp = generate_otp()
+
+    # Store OTP and expiration time (expires after 5 minutes)
+    otp_storage[email] = {'otp': otp, 'timestamp': time.time()}
+
+    # Send OTP to email
+    send_otp_email(email, otp)
+
+    return jsonify({"message": "OTP sent successfully to email"}), 200
+
+
+# Route to verify OTP
+@main_bp.route('/verify_otp', methods=['POST'])
+def verify_otp():
+    data = request.json
+    email = data.get('email')
+    otp = data.get('otp')
+
+    if not email or not otp:
+        return jsonify({"error": "Email and OTP are required"}), 400
+
+    # Check if OTP exists for the given email
+    if email not in otp_storage:
+        return jsonify({"error": "No OTP sent for this email"}), 400
+
+    stored_otp = otp_storage[email]['otp']
+    timestamp = otp_storage[email]['timestamp']
+
+    # Check if OTP has expired (5 minutes)
+    if time.time() - timestamp > 300:
+        del otp_storage[email]  # Remove expired OTP
+        return jsonify({"error": "OTP has expired"}), 400
+
+    # Check if the entered OTP is correct
+    if int(otp) == stored_otp:
+        del otp_storage[email]  # OTP successfully verified, remove it
+        return jsonify({"message": "OTP verified successfully"}), 200
+    else:
+        return jsonify({"error": "Invalid OTP"}), 400

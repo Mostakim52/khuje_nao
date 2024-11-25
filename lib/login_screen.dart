@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:khuje_nao/activity_feed.dart';
+import 'package:khuje_nao/main.dart';
 import 'api_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String email = '';
   String password = '';
   bool rememberMe = false; // Track the "Remember Me" checkbox state
+  String otp = ''; // To store entered OTP
 
   @override
   void initState() {
@@ -56,6 +58,46 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Show OTP Verification Dialog
+  void _showOtpDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Enter OTP send to your mail " + email),
+          content: TextField(
+            onChanged: (value) => otp = value,
+            decoration: const InputDecoration(labelText: "OTP"),
+            keyboardType: TextInputType.number,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Close dialog
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final isValidOtp = await apiService.verifyOtp(email, otp);
+                if (isValidOtp) {
+                  Navigator.pop(context); // Close dialog
+                  _showResponseDialog("OTP Verified! Redirecting...");
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => ActivityFeedPage()),
+                  );
+                } else {
+                  _showResponseDialog("Invalid OTP. Please try again.");
+                  _storage.delete(key: 'email');
+                }
+              },
+              child: const Text("Verify"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// Perform login and handle remember me logic
   Future<void> login() async {
     if (_formKey.currentState!.validate()) {
@@ -76,11 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
             // Save email securely if "Remember Me" is selected
             await _storage.write(key: 'email', value: email);
           }
-          _showResponseDialog("Log in Successful");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ActivityFeedPage()),
-          );
+          final otpSent = await apiService.sendOtp(email);
+          if (otpSent) {
+            _showOtpDialog(); // Show the OTP dialog
+          } else {
+            _showResponseDialog("Failed to send OTP. Please try again.");
+            _storage.delete(key: 'email');
+          }
           break;
       }
     }
@@ -89,7 +133,21 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+          title: const Text('Login'),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HomeScreen()),
+                );
+              },
+              child: const Text('Go Home'),
+            ),
+          ],
+      ),
       body: Form(
         key: _formKey,
         child: Padding(

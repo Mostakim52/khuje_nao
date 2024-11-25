@@ -156,5 +156,27 @@ class ApiService {
     }
   }
 
+  Future<bool> sendOtp(String email) async {
+    // Make API call to send OTP
+    final response = await http.post(
+      Uri.parse('$baseUrl/send_otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    return response.statusCode == 200;
+  }
+
+  Future<bool> verifyOtp(String email, String otp) async {
+    // Make API call to verify OTP
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify_otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+
+    return response.statusCode == 200;
+  }
+
 
 }

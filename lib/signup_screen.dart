@@ -46,7 +46,7 @@ class _SignupScreenState extends State<SignupScreen> {
         case -4: _showResponseDialog("Invalid NSU ID. Must be first 7 digits of NSU ID.");
         case -5: _showResponseDialog("Invalid phone number: Make sure The number starts with 01, the third digit is 3 through 9 (for valid operators and the total length is exactly 11 digits.");
         case -6: _showResponseDialog("Sign Up failed");
-        case 0: _showResponseDialog("Sign Up Successful");
+        case 0: _showResponseDialog("Sign Up Successful"); Navigator.pop(context);
       }
     }
   }
