@@ -1,17 +1,20 @@
 from . import mongo
 from bson import ObjectId
+from datetime import datetime
 
 # User model for MongoDB operations
 class UserModel:
     @staticmethod
     def create_user(data):
         # Ensure all required fields are provided
+        # Ensuring all required fields are provided
         required_fields = ["name", "email", "phone_number", "password", "nsu_id"]
         for field in required_fields:
             if field not in data or not data[field]:
                 raise ValueError(f"Missing required field: {field}")
 
         # Insert user into the database
+        # Inserting user into the database
         user_id = mongo.db.users.insert_one(data).inserted_id
         return str(user_id)
 
@@ -22,6 +25,28 @@ class UserModel:
     @staticmethod
     def get_user_by_nsu_id(nsu_id):
         return mongo.db.users.find_one({"nsu_id": nsu_id})
+    
+class FoundItemModel:
+    @staticmethod
+    def report_found_item(description, location, image_path):
+        data = {
+            "description": description,
+            "location": location,
+            "image_path": image_path,
+            "created_at": datetime.utcnow()
+        }
+        found_item_id = mongo.db.found_items.insert_one(data).inserted_id
+        return str(found_item_id)
+
+    @staticmethod
+    def get_found_items(limit=10, skip=0):
+        items = (
+            mongo.db.found_items.find()
+            .skip(skip)
+            .limit(limit)
+            .sort("created_at", -1)
+        )
+        return list(items)    
 
 
 # Lost Item model for MongoDB operations

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from .models import UserModel, LostItemModel, MessageModel
+from .models import UserModel, LostItemModel, MessageModel, FoundItemModel
 from .utils import hash_password, check_password, is_valid_phone_number, is_valid_nsu_id
 
 main_bp = Blueprint("main", __name__)
@@ -75,6 +75,24 @@ def get_lost_items():
 
     items = LostItemModel.get_lost_items(query={}, limit=per_page, skip=skip)
     return jsonify(items), 200
+
+@main_bp.route('/found-items', methods=['POST'])
+def report_found_item():
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get("description") or not data.get("location") or not data.get("image_path"):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Call the model to save the found item
+    found_item_id = FoundItemModel.report_found_item(
+        description=data["description"],
+        location=data["location"],
+        image_path=data["image_path"]
+    )
+
+    return jsonify({"message": "Found item reported successfully", "id": found_item_id}), 201
+
 
 @main_bp.route("/activity-feed", methods=["GET"])
 def activity_feed():
