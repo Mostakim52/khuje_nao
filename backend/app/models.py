@@ -47,7 +47,7 @@ class FoundItemModel:
         )
         return [
             {**item, "_id": str(item["_id"])} for item in items
-        ]    
+        ]
 
 class LostItemModel:
     @staticmethod
