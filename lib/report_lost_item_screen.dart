@@ -3,14 +3,14 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'api_service.dart';
 
-class ReportFoundItemScreen extends StatefulWidget {
-  const ReportFoundItemScreen({Key? key}) : super(key: key);
+class ReportLostItemScreen extends StatefulWidget {
+  const ReportLostItemScreen({Key? key}) : super(key: key);
 
   @override
-  _ReportFoundItemScreenState createState() => _ReportFoundItemScreenState();
+  _ReportLostItemScreenState createState() => _ReportLostItemScreenState();
 }
 
-class _ReportFoundItemScreenState extends State<ReportFoundItemScreen> {
+class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   File? _image;
@@ -41,7 +41,7 @@ class _ReportFoundItemScreenState extends State<ReportFoundItemScreen> {
         return;
       }
 
-      final success = await ApiService().reportFoundItem(
+      final success = await ApiService().reportLostItem(
         description: description,
         location: location,
         imagePath: _image!.path,

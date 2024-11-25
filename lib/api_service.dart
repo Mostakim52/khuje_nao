@@ -106,18 +106,31 @@ class ApiService {
   }
 
 
-  Future<bool> reportFoundItem({
+  Future<bool> reportLostItem({
     required String description,
     required String location,
     required String imagePath,
   }) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/report-found'));
-      request.fields['description'] = description;
-      request.fields['location'] = location;
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
 
-      final response = await request.send();
+      final response = await http.post(
+        Uri.parse('$baseUrl/lost-items'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "description": description,
+          "location": location,
+          //"image_path" : await http.MultipartFile.fromPath('image', imagePath),
+          "reported_by": await storage.read(key: "email")
+        }),
+      );
+
+      // var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/lost-items'));
+      // request.fields['description'] = description;
+      // request.fields['location'] = location;
+      // request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+      // request.fields['reported_by'] = await storage.read(key: "email").toString();
+
+      //final response = await request.send();
       return response.statusCode == 201;
     } catch (e) {
       print('Error reporting found item: $e');

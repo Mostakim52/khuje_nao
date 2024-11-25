@@ -3,7 +3,7 @@ import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
 import 'chat_page.dart'; // Import the ChatPage
-import 'report_found_item_screen.dart'; // Import the Report Found Item Screen
+import 'report_lost_item_screen.dart'; // Import the Report Found Item Screen
 import 'search_lost_item_screen.dart';  // Import the Search Lost Items Screen
 
 
@@ -69,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (Context) => ReportFoundItemScreen())  // Navigate to Report Found Item)
+                      MaterialPageRoute(builder: (Context) => ReportLostItemScreen())  // Navigate to Report Found Item)
                   );
                 },
                 child: const Text('Report Found Item'),
