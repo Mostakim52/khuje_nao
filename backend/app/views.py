@@ -125,8 +125,10 @@ def activity_feed():
 import random
 import time
 import sendgrid
+from dotenv import load_dotenv
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import os
+load_dotenv()
 @main_bp.route('/send_message', methods=['POST'])
 def send_message():
     data = request.json
@@ -145,7 +147,7 @@ def get_messages():
     return jsonify(messages), 200
 
 # SendGrid API Client
-sg = sendgrid.SendGridAPIClient(api_key='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')  # Ensure the API key is set
+sg = sendgrid.SendGridAPIClient(api_key=os.getenv("SENDGRID_API_KEY"))  # Ensure the API key is set
 
 # Temporary storage for OTP (Use a better storage like Redis or a database in production)
 otp_storage = {}
