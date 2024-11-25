@@ -53,27 +53,27 @@ def signup():
     user_id = UserModel.create_user(data)
     return jsonify({"message": "User created successfully", "id": user_id}), 201
 
-@main_bp.route("/lost-items", methods=["POST"])
+@main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
     data = request.get_json()
-    if not data or "name" not in data or "description" not in data or "location" not in data:
-        return jsonify({"error": "Invalid data"}), 400
 
-    item_id = LostItemModel.report_lost_item({
-        "name": data["name"],
-        "description": data["description"],
-        "location": data["location"],
-        "is_found": data.get("is_found", False),
-    })
-    return jsonify({"message": "Lost item reported successfully", "id": item_id}), 201
+    if not data.get("description") or not data.get("location") or not data.get("image_path") or not data.get("reported_by"):
+        return jsonify({"error": "Missing required fields"}), 400
 
-@main_bp.route("/lost-items", methods=["GET"])
+    lost_item_id = LostItemModel.report_lost_item(
+        description=data["description"],
+        location=data["location"],
+        image_path=data["image_path"],
+        reported_by=data["reported_by"],
+    )
+    return jsonify({"message": "Lost item reported successfully", "id": lost_item_id}), 201
+
+@main_bp.route('/lost-items', methods=['GET'])
 def get_lost_items():
-    page = int(request.args.get("page", 1))
-    per_page = int(request.args.get("per_page", 10))
-    skip = (page - 1) * per_page
+    limit = int(request.args.get("limit", 10))
+    skip = int(request.args.get("skip", 0))
 
-    items = LostItemModel.get_lost_items(query={}, limit=per_page, skip=skip)
+    items = LostItemModel.get_lost_items(limit=limit, skip=skip)
     return jsonify(items), 200
 
 @main_bp.route('/found-items', methods=['POST'])
@@ -93,6 +93,22 @@ def report_found_item():
 
     return jsonify({"message": "Found item reported successfully", "id": found_item_id}), 201
 
+@main_bp.route('/lost-items/<item_id>/found', methods=['POST'])
+def mark_item_as_found(item_id):
+    # Mark the item as found and move it to the found_items collection
+    result = LostItemModel.mark_item_as_found(item_id)
+    if not result:
+        return jsonify({"error": "Lost item not found or already marked as found"}), 404
+
+    return jsonify({"message": "Item marked as found and moved to found items", "id": result}), 200
+
+@main_bp.route('/found-items', methods=['GET'])
+def get_found_items():
+    limit = int(request.args.get("limit", 100))
+    skip = int(request.args.get("skip", 0))
+    
+    items = FoundItemModel.get_found_items(limit=limit, skip=skip)
+    return jsonify(items), 200
 
 @main_bp.route("/activity-feed", methods=["GET"])
 def activity_feed():
