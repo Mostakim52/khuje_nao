@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
-  final String baseUrl = 'http://127.0.0.1:5000'; // Replace with your backend URL
+  final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
   final storage = const FlutterSecureStorage();
 
   // Method for signing up users
@@ -36,11 +36,11 @@ class ApiService {
         Uri.parse('$baseUrl/signup'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "name": name,
-          "email": email,
-          "phone_number" : phone_number,
-          "password": password,
-          "nsu_id" : nsu_id
+          "name": name.toString(),
+          "email": email.toString(),
+          "phone_number" : phone_number.toString(),
+          "password": password.toString(),
+          "nsu_id" : nsu_id.toString()
         }),
       );
 
@@ -82,9 +82,10 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        String token = data['access_token'];
-        await storage.write(key: "jwt_token", value: token);
-        await storage.write(key: "user_email", value: email);
+        print(data.toString());
+        //String token = data['access_token'];
+        //await storage.write(key: "jwt_token", value: token);
+        await storage.write(key: "email", value: data["email"]);
         print("Login successful! Token stored.");
         return 0;
       } else {
@@ -93,7 +94,7 @@ class ApiService {
       }
     }
     catch(e){
-      print("Login failed.");
+      print("Login failed." + e.toString());
       return -9;
     }
   }

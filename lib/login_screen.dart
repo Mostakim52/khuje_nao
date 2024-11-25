@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
         case -1: _showResponseDialog("Invalid email");
         case -2: _showResponseDialog("Invalid password: Must be at least 8 characters and have at least 1 uppercase letter and a number");
         case -9: _showResponseDialog("Login failed.");
+        case 0: _showResponseDialog("Log in Successful");
       }
     }
   }

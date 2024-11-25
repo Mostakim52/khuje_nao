@@ -25,7 +25,7 @@ def login():
     if not user or not check_password(data["password"], user["password"]):
         return jsonify({"error": "Invalid email or password"}), 400
 
-    return jsonify({"message": "Login successful", "user_id": str(user["_id"])}), 200
+    return jsonify({"message": "Login successful", "email": str(user["email"])}), 200
 
 @main_bp.route("/signup", methods=["POST"])
 def signup():
@@ -104,15 +104,16 @@ def activity_feed():
 @main_bp.route('/send_message', methods=['POST'])
 def send_message():
     data = request.json
-    if not data.get("chat_id") or not data.get("text") or not data.get("author_id"):
+    if not data.get("text") or not data.get("author_id") or not data.get("created_at"):
         return jsonify({"error": "Missing required fields"}), 400
 
     message_id = MessageModel.send_message(data)
     return jsonify({"message_id": message_id}), 201
 
-@main_bp.route('/get_messages/<chat_id>', methods=['GET'])
-def get_messages(chat_id):
+@main_bp.route('/get_messages', methods=['POST'])
+def get_messages():
+    data = request.json
     limit = int(request.args.get("limit", 50))
     skip = int(request.args.get("skip", 0))
-    messages = MessageModel.get_messages(chat_id, limit=limit, skip=skip)
+    messages = MessageModel.get_messages(data.get("author_id"), data.get("receiver_id"), limit=limit, skip=skip)
     return jsonify(messages), 200

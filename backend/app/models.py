@@ -73,27 +73,19 @@ class MessageModel:
         return str(message_id)
 
     @staticmethod
-    def get_messages(chat_id, limit=50, skip=0):
+    def get_messages(author_id, receiver_id, limit=50, skip=0):
         messages = (
-            mongo.db.messages.find({"chat_id": chat_id})
+            mongo.db.messages.find(
+            {"$or": [
+                {"author_id": author_id, "receiver_id": receiver_id},
+                {"author_id": receiver_id, "receiver_id": author_id}
+            ]}
+        )
             .skip(skip)
             .limit(limit)
             .sort("created_at", -1)  # Sort by most recent first
         )
-        return list(messages)
-
-    @staticmethod
-    def get_message_by_id(message_id):
-        return mongo.db.messages.find_one({"_id": ObjectId(message_id)})
-
-    @staticmethod
-    def delete_message(message_id):
-        result = mongo.db.messages.delete_one({"_id": ObjectId(message_id)})
-        return result.deleted_count > 0
-
-    @staticmethod
-    def update_message(message_id, updated_data):
-        result = mongo.db.messages.update_one(
-            {"_id": ObjectId(message_id)}, {"$set": updated_data}
-        )
-        return result.modified_count > 0
+        return [
+            {**message, "_id": str(message["_id"])}  # Replace ObjectId with its string representation
+            for message in messages
+        ]
