@@ -95,15 +95,6 @@ class LostItemModel:
             {**item, "_id": str(item["_id"])} for item in items
         ]
 
-    @staticmethod
-    def get_found_items(limit=10, skip=0):
-        items = (
-            mongo.db.found_items.find()
-            .skip(skip)
-            .limit(limit)
-            .sort("found_at", -1)
-        )
-        return list(items)
 
 class MessageModel:
     @staticmethod

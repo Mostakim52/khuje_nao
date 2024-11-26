@@ -1,8 +1,16 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from .models import UserModel, LostItemModel, MessageModel, FoundItemModel
 from .utils import hash_password, check_password, is_valid_phone_number, is_valid_nsu_id
+import os
+from werkzeug.utils import secure_filename
 
 main_bp = Blueprint("main", __name__)
+
+UPLOAD_FOLDER = 'uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @main_bp.route("/users", methods=["POST"])
 def create_user():
@@ -55,15 +63,35 @@ def signup():
 
 @main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
-    data = request.get_json()
 
-    if not data.get("description") or not data.get("location") or not data.get("image_path") or not data.get("reported_by"):
+    image_path = None
+
+    if 'image' in request.files:
+        file = request.files['image']
+
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        else:
+            return jsonify({"error": "Invalid file type"}), 400
+
+    data = request.form if image_path else request.get_json()
+
+    description = data.get("description")
+    location = data.get("location")
+    reported_by = data.get("reported_by")
+
+    if not description or not location or not reported_by:
         return jsonify({"error": "Missing required fields"}), 400
 
     lost_item_id = LostItemModel.report_lost_item(
         description=data["description"],
         location=data["location"],
-        image_path=data["image_path"],
+        image_path=data["image_path"] or data.get("image_path"),
         reported_by=data["reported_by"],
     )
     return jsonify({"message": "Lost item reported successfully", "id": lost_item_id}), 201

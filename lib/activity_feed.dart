@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:khuje_nao/report_lost_item_screen.dart';
 import 'package:khuje_nao/search_lost_item_screen.dart';
 import 'package:khuje_nao/login_screen.dart';
@@ -11,33 +13,47 @@ class ActivityFeedPage extends StatefulWidget {
 
 class _ActivityFeedPageState extends State<ActivityFeedPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  List<Map<String, dynamic>> lostItems = [];
+  List<Map<String, dynamic>> foundItems = [];
+  bool isLoading = true;
 
-  // Mock data for lost and found items (replace with API data)
-  final List<Map<String, String>> lostItems = [
-    {
-      "title": "Lost Wallet",
-      "description": "Black leather wallet lost in the library.",
-      "location": "Library"
-    },
-    {
-      "title": "Lost Laptop",
-      "description": "Silver Dell XPS laptop lost in the cafeteria.",
-      "location": "Cafeteria"
-    }
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchItems();
+  }
 
-  final List<Map<String, String>> foundItems = [
-    {
-      "title": "Found Phone",
-      "description": "Blue Samsung phone found near the main gate.",
-      "location": "Main Gate"
-    },
-    {
-      "title": "Found Backpack",
-      "description": "Black backpack found in the auditorium.",
-      "location": "Auditorium"
+  /// Fetch lost and found items from the backend
+  Future<void> fetchItems() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final lostItemsResponse =
+      await http.get(Uri.parse('http://10.0.2.2:5000/lost-items'));
+      final foundItemsResponse =
+      await http.get(Uri.parse('http://10.0.2.2:5000/found-items'));
+
+      if (lostItemsResponse.statusCode == 200 &&
+          foundItemsResponse.statusCode == 200) {
+        setState(() {
+          lostItems = List<Map<String, dynamic>>.from(
+              json.decode(lostItemsResponse.body));
+          foundItems = List<Map<String, dynamic>>.from(
+              json.decode(foundItemsResponse.body));
+        });
+      } else {
+        print('Failed to fetch items. Status code: ${lostItemsResponse.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching items: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
-  ];
+  }
 
   /// Logout and redirect to login screen
   Future<void> _logout() async {
@@ -64,7 +80,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             ),
           ],
         ),
-        body: Column(
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
           children: [
             // Buttons Row
             Padding(
@@ -77,7 +95,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ReportLostItemScreen()),
+                            builder: (context) =>
+                            const ReportLostItemScreen()),
                       );
                     },
                     child: const Text('Report Lost Item'),
@@ -87,7 +106,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const SearchLostItemsScreen()),
+                            builder: (context) =>
+                            const SearchLostItemsScreen()),
                       );
                     },
                     child: const Text('Search Item'),
@@ -114,9 +134,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       return Card(
                         margin: const EdgeInsets.all(10),
                         child: ListTile(
-                          title: Text(item["title"] ?? ""),
+                          title: Text(item["description"] ?? "No Title"),
                           subtitle: Text(
-                            "${item["description"]}\nLocation: ${item["location"]}",
+                            "Location: ${item["location"] ?? "Unknown"}",
                           ),
                         ),
                       );
@@ -131,9 +151,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       return Card(
                         margin: const EdgeInsets.all(10),
                         child: ListTile(
-                          title: Text(item["title"] ?? ""),
+                          title: Text(item["description"] ?? "No Title"),
                           subtitle: Text(
-                            "${item["description"]}\nLocation: ${item["location"]}",
+                            "Location: ${item["location"] ?? "Unknown"}",
                           ),
                         ),
                       );
@@ -144,20 +164,6 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class AddItemPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Item'),
-      ),
-      body: const Center(
-        child: Text('This is the Add Item Page.'),
       ),
     );
   }

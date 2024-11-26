@@ -10,6 +10,8 @@ mongo = PyMongo()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)  # Load configuration
+    app.config['UPLOAD_FOLDER'] = 'uploads/'
+    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
     # Initialize PyMongo with the app configuration
     mongo.init_app(app)

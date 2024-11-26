@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -135,6 +137,38 @@ class ApiService {
     } catch (e) {
       print('Error reporting found item: $e');
       return false;
+    }
+  }
+
+  Future<void> reportFoundItem({
+    required String description,
+    required String location,
+    required File imageFile,
+  }) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://10.0.2.2:5000/found-items'),
+      );
+
+      request.fields['description'] = description;
+      request.fields['location'] = location;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'image',
+          imageFile.path,
+        ),
+      );
+
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        print('Report submitted successfully!');
+      } else {
+        print('Failed to submit report: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
