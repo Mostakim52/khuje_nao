@@ -23,13 +23,20 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
         setState(() {
           _image = File(pickedFile.path);
         });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No image selected!')),
+        );
       }
     } catch (e) {
-      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
     }
   }
 
   Future<void> _submitReport() async {
+    FocusScope.of(context).unfocus(); // Close the keyboard
     try {
       final description = descriptionController.text;
       final location = locationController.text;
@@ -41,32 +48,46 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
         return;
       }
 
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
       final success = await ApiService().reportLostItem(
         description: description,
         location: location,
         imagePath: _image!.path,
       );
 
+      Navigator.pop(context); // Close loading dialog
+
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Report submitted successfully!')),
         );
-        Navigator.pop(context);
+        Navigator.pop(context); // Close the form screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to submit report.')),
         );
       }
     } catch (e) {
-      print('Error submitting report: $e');
+      Navigator.pop(context); // Close loading dialog if error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error submitting report: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Found Item')),
-      body: Padding(
+      appBar: AppBar(title: const Text('Report Lost Item')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [

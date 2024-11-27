@@ -114,31 +114,33 @@ class ApiService {
     required String imagePath,
   }) async {
     try {
+      String? email = await storage.read(key: "email");
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/lost-items'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "description": description,
-          "location": location,
-          //"image_path" : await http.MultipartFile.fromPath('image', imagePath),
-          "reported_by": await storage.read(key: "email")
-        }),
-      );
+      if (email == null || email.isEmpty) {
+        print('Email not found.');
+        return false;
+      }
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/lost-items'));
+      request.fields['description'] = description;
+      request.fields['location'] = location;
+      request.fields['reported_by'] = email;
+      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+      print('Email being sent: $email');
+      final response = await request.send();
 
-      // var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/lost-items'));
-      // request.fields['description'] = description;
-      // request.fields['location'] = location;
-      // request.files.add(await http.MultipartFile.fromPath('image', imagePath));
-      // request.fields['reported_by'] = await storage.read(key: "email").toString();
-
-      //final response = await request.send();
-      return response.statusCode == 201;
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        // Log server error response
+        print('Error: ${response.statusCode}');
+        return false;
+      }
     } catch (e) {
-      print('Error reporting found item: $e');
+      print('Error reporting lost item: $e');
       return false;
     }
   }
+
 
   Future<void> reportFoundItem({
     required String description,

@@ -63,9 +63,9 @@ def signup():
 
 @main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
-
     image_path = None
 
+    # Handling image upload
     if 'image' in request.files:
         file = request.files['image']
 
@@ -74,25 +74,28 @@ def report_lost_item():
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
             image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(image_path)
         else:
             return jsonify({"error": "Invalid file type"}), 400
 
-    data = request.form if image_path else request.get_json()
+    # Parse form data after file handling
+    data = request.form
 
     description = data.get("description")
     location = data.get("location")
     reported_by = data.get("reported_by")
 
+    # Validation for required fields
     if not description or not location or not reported_by:
         return jsonify({"error": "Missing required fields"}), 400
 
+    # Report lost item in the database
     lost_item_id = LostItemModel.report_lost_item(
-        description=data["description"],
-        location=data["location"],
-        image_path=data["image_path"] or data.get("image_path"),
-        reported_by=data["reported_by"],
+        description=description,
+        location=location,
+        image_path=image_path,  # Use the uploaded image path
+        reported_by=reported_by,
     )
     return jsonify({"message": "Lost item reported successfully", "id": lost_item_id}), 201
 
