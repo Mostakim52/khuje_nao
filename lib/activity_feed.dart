@@ -140,7 +140,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             item["image"] != null && item["image"]!.isNotEmpty
                                 ? Image.network(
                               item["image"]!,
-                              height: 150,
+                              height: 300,
                               width: double.infinity,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
@@ -198,7 +198,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             item["image"] != null && item["image"]!.isNotEmpty
                                 ? Image.network(
                               item["image"]!,
-                              height: 150,
+                              height: 300,
                               width: double.infinity,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>

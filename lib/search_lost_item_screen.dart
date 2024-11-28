@@ -50,10 +50,6 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
               controller: queryController,
               decoration: const InputDecoration(labelText: 'Search Query'),
             ),
-            TextField(
-              controller: locationController,
-              decoration: const InputDecoration(labelText: 'Location'),
-            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _searchItems,
