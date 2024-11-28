@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
-import 'chat_page.dart'; // Import the ChatPage
-import 'report_lost_item_screen.dart'; // Import the Report Found Item Screen
-import 'search_lost_item_screen.dart';  // Import the Search Lost Items Screen
-
+import 'chat_page.dart';
+import 'report_lost_item_screen.dart';
+import 'search_lost_item_screen.dart';
+import 'localization.dart';
 
 void main() {
   NotificationService.initializeNotifications();
@@ -27,13 +28,55 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  String _language = 'en'; // Default language
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  // Load the language preference from secure storage
+  Future<void> _loadLanguage() async {
+    String? storedLanguage = await _storage.read(key: 'language');
+    setState(() {
+      _language = storedLanguage ?? 'en';
+    });
+  }
+
+  // Toggle the language and update storage
+  Future<void> _toggleLanguage() async {
+    String newLanguage = _language == 'en' ? 'bd' : 'en';
+    await _storage.write(key: 'language', value: newLanguage);
+    setState(() {
+      _language = newLanguage;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Welcome to Khuje Nao')),
+      appBar: AppBar(
+        title: const Text('Welcome to Khuje Nao'),
+        actions: [
+          ElevatedButton(
+            onPressed: _toggleLanguage,
+            child: Text(
+              _language == 'en' ? 'বাংলা' : 'English',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +88,7 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               },
-              child: const Text('Signup'),
+              child: Text(AppLocalization.getString(_language, 'signup')),
             ),
             ElevatedButton(
               onPressed: () {
@@ -54,37 +97,17 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: const Text('Login'),
+              child: Text(AppLocalization.getString(_language, 'login')),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ChatPage()), // Navigate to ChatPage
+                  MaterialPageRoute(builder: (context) => ChatPage()),
                 );
               },
-              child: const Text('Temporary Chat'),
+              child: Text(AppLocalization.getString(_language, 'chat')),
             ),
-            // ElevatedButton(
-            //     onPressed: () {
-            //       Navigator.push(
-            //           context,
-            //           MaterialPageRoute(builder: (Context) => ReportLostItemScreen())  // Navigate to Report Found Item)
-            //       );
-            //     },
-            //     child: const Text('Report Found Item'),
-            // ),
-
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => SearchLostItemsScreen()), // Navigate to Search Lost Items
-            //     );
-            //   },
-            //   child: const Text('Search Lost Items'),
-            // ),
-
           ],
         ),
       ),
