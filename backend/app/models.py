@@ -1,7 +1,9 @@
 from . import mongo
+from flask import url_for
 from bson import ObjectId
 from datetime import datetime
 from bson.objectid import ObjectId
+BASE_URL = "http://10.0.2.2:5000"
 
 # User model for MongoDB operations
 class UserModel:
@@ -38,7 +40,7 @@ class FoundItemModel:
         return str(found_item_id)
 
     @staticmethod
-    def get_found_items(limit=100, skip=0):
+    def get_found_items(limit=10, skip=0):
         items = (
             mongo.db.found_items.find()
             .skip(skip)
@@ -46,7 +48,10 @@ class FoundItemModel:
             .sort("created_at", -1)
         )
         return [
-            {**item, "_id": str(item["_id"])} for item in items
+            {**item, 
+            "_id": str(item["_id"])
+            }
+            for item in items
         ]
 
 class LostItemModel:
@@ -92,9 +97,11 @@ class LostItemModel:
             .sort("created_at", -1)
         )
         return [
-            {**item, "_id": str(item["_id"])} for item in items
+            {**item, 
+            "_id": str(item["_id"])
+            }
+            for item in items
         ]
-
 
 class MessageModel:
     @staticmethod

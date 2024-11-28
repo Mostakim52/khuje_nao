@@ -133,11 +133,52 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       final item = lostItems[index];
                       return Card(
                         margin: const EdgeInsets.all(10),
-                        child: ListTile(
-                          title: Text(item["description"] ?? "No Title"),
-                          subtitle: Text(
-                            "Location: ${item["location"] ?? "Unknown"}",
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display Image
+                            item["image"] != null && item["image"]!.isNotEmpty
+                                ? Image.network(
+                              item["image"]!,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                            )
+                                : Container(
+                              height: 150,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item["description"] ?? "No description provided",
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "Location: ${item["location"] ?? "Unknown"}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[700]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -150,11 +191,52 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                       final item = foundItems[index];
                       return Card(
                         margin: const EdgeInsets.all(10),
-                        child: ListTile(
-                          title: Text(item["description"] ?? "No Title"),
-                          subtitle: Text(
-                            "Location: ${item["location"] ?? "Unknown"}",
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display Image
+                            item["image"] != null && item["image"]!.isNotEmpty
+                                ? Image.network(
+                              item["image"]!,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                            )
+                                : Container(
+                              height: 150,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item["description"] ?? "No description provided",
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "Location: ${item["location"] ?? "Unknown"}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[700]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },

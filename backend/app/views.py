@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, url_for, send_from_directory
 from .models import UserModel, LostItemModel, MessageModel, FoundItemModel
 from .utils import hash_password, check_password, is_valid_phone_number, is_valid_nsu_id
 import os
@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename
 
 main_bp = Blueprint("main", __name__)
 
-UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
@@ -61,6 +60,10 @@ def signup():
     user_id = UserModel.create_user(data)
     return jsonify({"message": "User created successfully", "id": user_id}), 201
 
+@main_bp.route('/uploads/<filename>', endpoint='uploaded_file')
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
 @main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
     image_path = None
@@ -74,8 +77,12 @@ def report_lost_item():
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(image_path)
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            file.save(os.path.join(upload_folder, filename))
+            image_path = f"uploads/{filename}"
+            print(f"Image saved at: {os.path.join(upload_folder, filename)}")
         else:
             return jsonify({"error": "Invalid file type"}), 400
 
@@ -105,6 +112,13 @@ def get_lost_items():
     skip = int(request.args.get("skip", 0))
 
     items = LostItemModel.get_lost_items(limit=limit, skip=skip)
+
+    for item in items:
+        if "image_path" in item and item["image_path"]:
+            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+        else:
+            item["image"] = None
+
     return jsonify(items), 200
 
 @main_bp.route('/found-items', methods=['POST'])
@@ -139,6 +153,13 @@ def get_found_items():
     skip = int(request.args.get("skip", 0))
     
     items = FoundItemModel.get_found_items(limit=limit, skip=skip)
+
+    for item in items:
+        if "image_path" in item and item["image_path"]:
+            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+        else:
+            item["image"] = None
+            
     return jsonify(items), 200
 
 @main_bp.route("/activity-feed", methods=["GET"])
