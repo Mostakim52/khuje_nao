@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:khuje_nao/activity_feed.dart';
+import 'package:khuje_nao/localization.dart';
 import 'package:khuje_nao/main.dart';
 import 'api_service.dart';
 
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final ApiService apiService = ApiService();
   final _formKey = GlobalKey<FormState>();
   final _storage = const FlutterSecureStorage(); // For secure storage
+  String _language = 'en'; // Default language
   String email = '';
   String password = '';
   bool rememberMe = false; // Track the "Remember Me" checkbox state
@@ -24,6 +26,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkIfUserRemembered(); // Check if the user has already logged in
+    _loadLanguage();
+  }
+  Future<void> _loadLanguage() async {
+    String? storedLanguage = await _storage.read(key: 'language');
+    setState(() {
+      _language = storedLanguage ?? 'en';
+    });
   }
 
   /// Check if email exists in secure storage and redirect if true
@@ -50,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.pop(context); // Dismiss the dialog
               },
-              child: const Text("Okay"),
+              child: Text(AppLocalization.getString(_language,"okay")),
             ),
           ],
         );
@@ -64,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Enter OTP send to your mail " + email),
+          title: Text(AppLocalization.getString(_language,"otp_send") + email),
           content: TextField(
             onChanged: (value) => otp = value,
             decoration: const InputDecoration(labelText: "OTP"),
@@ -73,24 +82,24 @@ class _LoginScreenState extends State<LoginScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context), // Close dialog
-              child: const Text("Cancel"),
+              child: Text(AppLocalization.getString(_language,"cancel")),
             ),
             ElevatedButton(
               onPressed: () async {
                 final isValidOtp = await apiService.verifyOtp(email, otp);
                 if (isValidOtp) {
                   Navigator.pop(context); // Close dialog
-                  _showResponseDialog("OTP Verified! Redirecting...");
+                  _showResponseDialog(AppLocalization.getString(_language,"otp_verified"));
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => ActivityFeedPage()),
                   );
                 } else {
-                  _showResponseDialog("Invalid OTP. Please try again.");
+                  _showResponseDialog(AppLocalization.getString(_language,"otp_invalid"));
                   _storage.delete(key: 'email');
                 }
               },
-              child: const Text("Verify"),
+              child: Text(AppLocalization.getString(_language,"verify")),
             ),
           ],
         );
@@ -104,14 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
       int response = await apiService.login(email, password);
       switch (response) {
         case -1:
-          _showResponseDialog("Invalid email");
+          _showResponseDialog(AppLocalization.getString(_language,"invalid_mail"));
           break;
         case -2:
-          _showResponseDialog(
-              "Invalid password: Must be at least 8 characters and have at least 1 uppercase letter and a number");
+          _showResponseDialog(AppLocalization.getString(_language,"invalid_pass"));
           break;
         case -9:
-          _showResponseDialog("Login failed.");
+          _showResponseDialog(AppLocalization.getString(_language,"login_failed"));
           break;
         case 0:
           if (rememberMe) {
@@ -134,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Login'),
+          title: Text(AppLocalization.getString(_language,"login")),
           actions: [
             ElevatedButton(
               onPressed: () {
@@ -144,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       builder: (context) => const HomeScreen()),
                 );
               },
-              child: const Text('Go Home'),
+              child: Text(AppLocalization.getString(_language,"go_home")),
             ),
           ],
       ),
@@ -155,20 +163,20 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: <Widget>[
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: AppLocalization.getString(_language,"email")),
                 keyboardType: TextInputType.emailAddress,
                 onChanged: (value) => setState(() => email = value),
                 initialValue: email, // Prepopulate if saved
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(labelText: AppLocalization.getString(_language,"password")),
                 obscureText: true,
                 onChanged: (value) => setState(() => password = value),
                 initialValue: password, // Prepopulate if saved
               ),
               const SizedBox(height: 10),
               CheckboxListTile(
-                title: const Text("Remember Me"),
+                title: Text(AppLocalization.getString(_language,"remember_me")),
                 value: rememberMe,
                 onChanged: (bool? value) {
                   setState(() {
@@ -180,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: login,
-                child: const Text('Login'),
+                child: Text(AppLocalization.getString(_language,"login")),
               ),
             ],
           ),
