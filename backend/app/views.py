@@ -309,3 +309,27 @@ def get_chats():
         })
 
     return jsonify(chat_list), 200
+
+
+@main_bp.route('/search-lost-items', methods=['GET'])
+def search_lost_items():
+    query = request.args.get('query', '')
+    if not query:
+        return jsonify({"error": "No search query provided"}), 400
+
+    # Perform MongoDB text search on the 'description' and 'name' fields
+    items = mongo.db.lost_items.find(
+        {"description": query}  # MongoDB text search
+    ).limit(20)
+
+    result = []
+    for item in items:
+        result.append({
+            "_id": str(item["_id"]),
+            "description": item.get("description"),
+            "location": item.get("location"),
+            "image": url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True),  # Return the image path
+            "reported_by": item.get("reported_by")
+        })
+
+    return jsonify(result), 200

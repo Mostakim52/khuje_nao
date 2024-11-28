@@ -176,10 +176,9 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> searchLostItems({
     required String query,
-    required String location,
   }) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/search-lost?query=$query&location=$location'));
+      final response = await http.get(Uri.parse('$baseUrl/search-lost-items?query=$query'));
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
       } else {

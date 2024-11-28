@@ -99,15 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text(AppLocalization.getString(_language, 'login')),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChatPage()),
-                );
-              },
-              child: Text(AppLocalization.getString(_language, 'chat')),
-            ),
           ],
         ),
       ),
