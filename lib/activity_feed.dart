@@ -8,6 +8,13 @@ import 'package:khuje_nao/search_lost_item_screen.dart';
 import 'package:khuje_nao/login_screen.dart';
 import 'chat_page.dart';
 import 'chat_page_list.dart';
+import 'dart:ui' as ui; // Required for boundary.toImage
+import 'dart:io'; // For File operations
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart'; // For temporary directory
+import 'package:share_plus/share_plus.dart'; // For sharing
+import 'dart:typed_data';
+import 'package:flutter/widgets.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   @override
@@ -18,6 +25,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> lostItems = [];
   List<Map<String, dynamic>> foundItems = [];
+  final GlobalKey _globalKey = GlobalKey();
   bool isLoading = true;
 
   @override
@@ -57,6 +65,44 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       });
     }
   }
+
+  Future<void> _captureAndShareCard(GlobalKey key) async {
+    try {
+      // Wait until the widget has been fully rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          // Find the render object using the provided GlobalKey
+          RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+          // Capture the image from the boundary
+          ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+          ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+          if (byteData != null) {
+            final Uint8List pngBytes = byteData.buffer.asUint8List();
+
+            // Save the image to a temporary directory
+            final directory = await getTemporaryDirectory();
+            final imagePath = '${directory.path}/lost_item.png';
+            File imgFile = File(imagePath);
+            await imgFile.writeAsBytes(pngBytes);
+
+            // Share the image using XFile from share_plus
+            final XFile xFile = XFile(imagePath);
+            await Share.shareXFiles(
+              [xFile],
+              text: 'Check out this lost item!',
+            );
+          }
+        } catch (e) {
+          print('Error capturing and sharing image: $e');
+        }
+      });
+    } catch (e) {
+      print('Error scheduling post frame callback: $e');
+    }
+  }
+
 
   /// Logout and redirect to login screen
   Future<void> _logout() async {
@@ -146,7 +192,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                     itemCount: lostItems.length,
                     itemBuilder: (context, index) {
                       final item = lostItems[index];
-                      return Card(
+                      return RepaintBoundary(
+                      key: _globalKey,
+                        child: Card(
                         margin: const EdgeInsets.all(10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,13 +282,25 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                         },
                                       ),
                                     ],
-                                  )
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Column(
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          await _captureAndShareCard(_globalKey);  // Share the card content
+                                        },
+                                        child: const Text("Share"),
+                                      ),
+                                    ],
+                                  ),
 
                                 ],
                               ),
                             ),
                           ],
                         ),
+                      )
                       );
                     },
                   ),
@@ -293,6 +353,17 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.grey[700]),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Column(
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          await _captureAndShareCard(_globalKey);  // Share the card content
+                                        },
+                                        child: const Text("Share"),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
