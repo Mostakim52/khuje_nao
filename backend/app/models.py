@@ -83,9 +83,8 @@ class LostItemModel:
         }
         mongo.db.found_items.insert_one(found_item_data)
 
-        mongo.db.lost_items.update_one(
-            {"_id": ObjectId(item_id)}, {"$set": {"is_found": True}}
-        )
+        mongo.db.lost_items.delete_one({"_id": ObjectId(item_id)})
+
         return str(item_id)
 
     @staticmethod

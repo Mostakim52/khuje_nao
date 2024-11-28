@@ -103,40 +103,53 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child:
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                item["description"] ?? "No description provided",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                "Location: ${item["location"] ?? "Unknown"}",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  // Save the receiver email to storage
-                                  await _storage.write(key: "receiver_email", value: reportedByEmail);
+                              FutureBuilder<String?>(
+                                future: _storage.read(key: "email"), // Fetch the current user email from storage
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const SizedBox(); // Show an empty widget while loading
+                                  }
 
-                                  // Navigate to the ChatPage
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => ChatPage()),
-                                  );
+                                  final currentUserEmail = snapshot.data;
+                                  final reportedByEmail = item["reported_by"] ?? "";
+
+                                  // Only show the button if the current user's email is not the same as the reported_by email
+                                  if (currentUserEmail != null && currentUserEmail != reportedByEmail) {
+                                    return ElevatedButton(
+                                      onPressed: () async {
+                                        // Save the receiver email to storage
+                                        await _storage.write(key: "receiver_email", value: reportedByEmail);
+
+                                        // Navigate to the ChatPage
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => ChatPage()),
+                                        );
+                                      },
+                                      child: const Text("Chat"),
+                                    );
+                                  } else {
+                                    return
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          final itemId = item["_id"]; // Replace with the actual ID of the item to mark as found
+                                          await ApiService().markItemAsFound(itemId);
+                                          // Optionally show a confirmation dialog or refresh the list
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Item marked as found')),
+                                          );
+                                        },
+                                        child: const Text("Mark as Found"),
+                                      );
+                                  }
                                 },
-                                child: const Text("Chat"),
                               ),
                             ],
-                          ),
+                          )
                         ),
                       ],
                     ),

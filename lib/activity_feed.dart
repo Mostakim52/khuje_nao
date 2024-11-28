@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:khuje_nao/api_service.dart';
 import 'package:khuje_nao/report_lost_item_screen.dart';
 import 'package:khuje_nao/search_lost_item_screen.dart';
 import 'package:khuje_nao/login_screen.dart';
@@ -217,7 +218,18 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                               child: const Text("Chat"),
                                             );
                                           } else {
-                                            return const SizedBox(); // Return an empty widget if the condition is not met
+                                            return
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  final itemId = item["_id"]; // Replace with the actual ID of the item to mark as found
+                                                  await ApiService().markItemAsFound(itemId);
+                                                  // Optionally show a confirmation dialog or refresh the list
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Item marked as found')),
+                                                  );
+                                                },
+                                                child: const Text("Mark as Found"),
+                                              );
                                           }
                                         },
                                       ),

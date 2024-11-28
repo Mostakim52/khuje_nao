@@ -142,37 +142,24 @@ class ApiService {
   }
 
 
-  Future<void> reportFoundItem({
-    required String description,
-    required String location,
-    required File imageFile,
-  }) async {
+  Future<void> markItemAsFound(String itemId) async {
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://10.0.2.2:5000/found-items'),
+      final response = await http.post(
+        Uri.parse('$baseUrl/lost-items/$itemId/found'),
       );
 
-      request.fields['description'] = description;
-      request.fields['location'] = location;
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'image',
-          imageFile.path,
-        ),
-      );
-
-      final response = await request.send();
-
-      if (response.statusCode == 201) {
-        print('Report submitted successfully!');
+      if (response.statusCode == 200) {
+        print('Item marked as found successfully!');
+      } else if (response.statusCode == 404) {
+        print('Item not found or already marked as found.');
       } else {
-        print('Failed to submit report: ${response.statusCode}');
+        print('Failed to mark item as found: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
     }
   }
+
 
   Future<List<Map<String, dynamic>>> searchLostItems({
     required String query,
