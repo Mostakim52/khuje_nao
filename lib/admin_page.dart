@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:khuje_nao/api_service.dart';
+
 class AdminPage extends StatefulWidget {
   @override
   _AdminPageState createState() => _AdminPageState();
@@ -11,6 +13,7 @@ class _AdminPageState extends State<AdminPage> {
   List<dynamic> _lostItems = [];
   bool _isLoading = true;
   final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
+  final ApiService apiService = ApiService();
 
   @override
   void initState() {
@@ -68,12 +71,21 @@ class _AdminPageState extends State<AdminPage> {
       appBar: AppBar(
           title: Text('Admin Panel - Lost Items'),
           actions: [
-      IconButton(
-      icon: const Icon(Icons.refresh), // Refresh icon
-      onPressed: () {
-        _fetchLostItems(); // Trigger refresh when pressed
-      },
-    ),
+            IconButton(
+              icon: const Icon(Icons.refresh), // Refresh icon
+              onPressed: () {
+                _fetchLostItems(); // Trigger refresh when pressed
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                apiService.sendEmails();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Emails submitted successfully.')),
+                );
+              },
+              child: const Text('Send Emails'),
+            ),
   ]),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

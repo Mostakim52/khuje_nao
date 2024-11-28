@@ -160,6 +160,22 @@ class ApiService {
     }
   }
 
+  Future<void> sendEmails() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/send_lost_items_email'),
+      );
+
+      if (response.statusCode == 200) {
+        print('Emails sent successfully!');
+      } else if (response.statusCode == 404) {
+        print('Failed to send emails.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   Future<List<Map<String, dynamic>>> searchLostItems({
     required String query,
