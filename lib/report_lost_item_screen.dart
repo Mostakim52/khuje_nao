@@ -67,7 +67,7 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report submitted successfully!')),
+          const SnackBar(content: Text('Report submitted successfully! Awaiting admin approval.')),
         );
         Navigator.pop(context); // Close the form screen
       } else {

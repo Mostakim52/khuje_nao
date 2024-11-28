@@ -3,12 +3,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
-import 'chat_page.dart';
-import 'report_lost_item_screen.dart';
-import 'search_lost_item_screen.dart';
 import 'localization.dart';
 
-void main() {
+void main() async{
   NotificationService.initializeNotifications();
   runApp(const MyApp());
 }

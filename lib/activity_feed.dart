@@ -25,7 +25,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> lostItems = [];
   List<Map<String, dynamic>> foundItems = [];
-  final GlobalKey _globalKey = GlobalKey();
+  List<GlobalKey> _lostItemKeys = []; // List of keys for lost items
+  List<GlobalKey> _foundItemKeys = []; // List of keys for found items
   bool isLoading = true;
 
   @override
@@ -53,6 +54,10 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
               json.decode(lostItemsResponse.body));
           foundItems = List<Map<String, dynamic>>.from(
               json.decode(foundItemsResponse.body));
+
+          // Initialize keys for each list item
+          _lostItemKeys = List.generate(lostItems.length, (index) => GlobalKey());
+          _foundItemKeys = List.generate(foundItems.length, (index) => GlobalKey());
         });
       } else {
         print('Failed to fetch items. Status code: ${lostItemsResponse.statusCode}');
@@ -122,6 +127,12 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
         appBar: AppBar(
           title: const Text('Activity Feed'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh), // Refresh icon
+              onPressed: () {
+                fetchItems(); // Trigger refresh when pressed
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.chat),
               onPressed: () {
@@ -193,7 +204,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                     itemBuilder: (context, index) {
                       final item = lostItems[index];
                       return RepaintBoundary(
-                      key: _globalKey,
+                      key: _lostItemKeys[index],
                         child: Card(
                         margin: const EdgeInsets.all(10),
                         child: Column(
@@ -288,7 +299,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     children: [
                                       ElevatedButton(
                                         onPressed: () async {
-                                          await _captureAndShareCard(_globalKey);  // Share the card content
+                                          await _captureAndShareCard(_lostItemKeys[index]);  // Share the card content
                                         },
                                         child: const Text("Share"),
                                       ),
@@ -310,6 +321,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                     itemCount: foundItems.length,
                     itemBuilder: (context, index) {
                       final item = foundItems[index];
+                      key: _foundItemKeys[index]; // Use a unique key
                       return Card(
                         margin: const EdgeInsets.all(10),
                         child: Column(
@@ -359,7 +371,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     children: [
                                       ElevatedButton(
                                         onPressed: () async {
-                                          await _captureAndShareCard(_globalKey);  // Share the card content
+                                          await _captureAndShareCard(_foundItemKeys[index]);  // Share the card content
                                         },
                                         child: const Text("Share"),
                                       ),

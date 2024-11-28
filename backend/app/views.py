@@ -118,7 +118,7 @@ def get_lost_items():
             item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
         else:
             item["image"] = None
-
+    
     return jsonify(items), 200
 
 @main_bp.route('/found-items', methods=['POST'])
@@ -333,3 +333,143 @@ def search_lost_items():
         })
 
     return jsonify(result), 200
+
+# Function to send email to users
+def send_lost_item_email(to_email, lost_items_count):
+    from_email = Email("smartfreelancehub@gmail.com")  # Your email
+    to_email = To(to_email)  # Recipient's email
+    subject = "Lost Items Notification"
+
+    # Create a beautiful HTML email with the lost item count
+    content = Content(
+        "text/html", 
+        f"""
+        <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        color: #333;
+                        background-color: #f4f4f4;
+                        padding: 20px;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #fff;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    }}
+                    h1 {{
+                        color: #4CAF50;
+                        text-align: center;
+                    }}
+                    p {{
+                        font-size: 16px;
+                        line-height: 1.6;
+                    }}
+                    .button {{
+                        display: inline-block;
+                        padding: 12px 25px;
+                        background-color: #4CAF50;
+                        color: white;
+                        text-align: center;
+                        border-radius: 5px;
+                        text-decoration: none;
+                    }}
+                    .footer {{
+                        font-size: 12px;
+                        text-align: center;
+                        color: #aaa;
+                        margin-top: 20px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Lost Item Notification</h1>
+                    <p>Dear User,</p>
+                    <p><strong>{lost_items_count}</strong> lost item(s) are in NSU that you might want to check:</p>
+                    <p>If you find them, please report them back.</p>
+                    <div class="footer">
+                        <p>&copy; {time.strftime('%Y')} SmartFreelanceHub. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+        """
+    )
+
+    mail = Mail(from_email, to_email, subject, content)
+
+    try:
+        response = sg.send(mail)
+        print(f"Email sent with status code {response.status_code}")
+    except Exception as e:
+        print(f"Error sending email: {e}")
+
+# Example route to send lost items email
+@main_bp.route('/send_lost_items_email', methods=['POST'])
+def send_lost_items_email():
+    # Fetch lost items count from database using LostItemModel
+    lost_items_count = mongo.db.lost_items.count_documents({"is_found": False})  # Count lost items
+
+    if lost_items_count == 0:
+        return jsonify({"message": "No lost items to report"}), 200
+
+    # Fetch all user emails from the Users collection using UserModel
+    users = mongo.db.users.find()  # Fetch all users from the users collection
+
+    # Send the email to each user
+    count = 0
+    for user in users:
+        count+=1
+        email = user.get("email")
+        if email:
+            send_lost_item_email(email, lost_items_count)
+
+    return jsonify({"message": f"Lost items email sent to {count} users"}), 200
+
+
+from bson import ObjectId
+# Route to approve a lost item
+@main_bp.route('/lost-items/<item_id>/approve', methods=['POST'])
+def approve_item(item_id):
+    try:
+        # Find the lost item by ID
+        lost_item = mongo.db.lost_items.find_one({"_id": ObjectId(item_id)})
+
+        if not lost_item:
+            return jsonify({"error": "Lost item not found"}), 404
+
+        # Update the item to mark it as approved
+        result = mongo.db.lost_items.update_one(
+            {"_id": ObjectId(item_id)},
+            {"$set": {"is_approved": True}}
+        )
+
+        # Check if update was successful
+        if result.modified_count > 0:
+            return jsonify({"message": "Item approved successfully"}), 200
+        else:
+            return jsonify({"error": "Failed to approve item"}), 500
+
+    except Exception as e:
+        # Handle any exceptions that occur during the process
+        return jsonify({"error": f"Error: {str(e)}"}), 500
+    
+@main_bp.route('/lost-items-admin', methods=['GET'])
+def get_lost_items_admin():
+    limit = int(request.args.get("limit", 10))
+    skip = int(request.args.get("skip", 0))
+
+    items = LostItemModel.get_lost_items_admin(limit=limit, skip=skip)
+
+    for item in items:
+        if "image_path" in item and item["image_path"]:
+            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+        else:
+            item["image"] = None
+
+    return jsonify(items), 200

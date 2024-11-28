@@ -63,6 +63,7 @@ class LostItemModel:
             "image_path": image_path,
             "reported_by": reported_by,
             "is_found": False,
+            "is_approved": False,
             "created_at": datetime.utcnow(),
         }
         lost_item_id = mongo.db.lost_items.insert_one(data).inserted_id
@@ -91,6 +92,21 @@ class LostItemModel:
     def get_lost_items(limit=10, skip=0):
         items = (
             mongo.db.lost_items.find({"is_found": False})
+            .skip(skip)
+            .limit(limit)
+            .sort("created_at", -1)
+        )
+        return [
+            {**item, 
+            "_id": str(item["_id"])
+            }
+            for item in items
+        ]
+    
+    @staticmethod
+    def get_lost_items_admin(limit=10, skip=0):
+        items = (
+            mongo.db.lost_items.find({"is_approved": False})
             .skip(skip)
             .limit(limit)
             .sort("created_at", -1)

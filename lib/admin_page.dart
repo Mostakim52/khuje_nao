@@ -10,6 +10,7 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   List<dynamic> _lostItems = [];
   bool _isLoading = true;
+  final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
 
   @override
   void initState() {
@@ -18,7 +19,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Future<void> _fetchLostItems() async {
-    final url = 'http://your-server-url/lost-items'; // Replace with your server URL
+    final url = '$baseUrl/lost-items-admin'; // Replace with your server URL
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -35,7 +36,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Future<void> _approveItem(String itemId) async {
-    final url = 'http://your-server-url/lost-items/$itemId/approve'; // Replace with your server URL
+    final url = '$baseUrl/lost-items/$itemId/approve'; // Replace with your server URL
     try {
       final response = await http.post(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -64,7 +65,16 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Panel - Lost Items')),
+      appBar: AppBar(
+          title: Text('Admin Panel - Lost Items'),
+          actions: [
+      IconButton(
+      icon: const Icon(Icons.refresh), // Refresh icon
+      onPressed: () {
+        _fetchLostItems(); // Trigger refresh when pressed
+      },
+    ),
+  ]),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -79,7 +89,7 @@ class _AdminPageState extends State<AdminPage> {
               title: Text(item['description'] ?? 'No description'),
               subtitle: Text('Location: ${item['location'] ?? 'Unknown'}'),
               trailing: ElevatedButton(
-                onPressed: () => _approveItem(item['id'].toString()), // Approve button
+                onPressed: () => _approveItem(item['_id'].toString()), // Approve button
                 child: Text('Approve'),
               ),
             ),
