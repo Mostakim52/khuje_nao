@@ -5,6 +5,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async'; // For periodic updates
 
 class ChatPage extends StatefulWidget {
   @override
@@ -15,70 +16,89 @@ class _ChatPageState extends State<ChatPage> {
   List<types.Message> _messages = [];
   final storage = const FlutterSecureStorage();
   final serverurl = 'http://10.0.2.2:5000';
-  late types.User _user; // Updated to store `types.User`
-  bool _isLoading = true; // Track whether initialization is complete
-  final TextEditingController _receiverController = TextEditingController(); // For entering receiver ID/email
-  String _currentReceiver = ''; // To track the selected receiver
+  late types.User _user;
+  String _currentReceiver = '';
+  bool _isLoading = true;
+  Timer? _messageTimer; // Timer for periodic message refresh
 
   @override
   void initState() {
     super.initState();
-    _initializeUser(); // Initialize user data
+    _initializeUser();
   }
 
-  /// Initialize the `_user` object by reading the email from storage
+  @override
+  void dispose() {
+    _messageTimer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+  /// Initialize the user and load messages
   Future<void> _initializeUser() async {
     try {
-      final email = await storage.read(key: "email"); // Read email from storage
-      if (email != null) {
+      final email = await storage.read(key: "email");
+      final receiverEmail = await storage.read(key: "receiver_email");
+
+      if (email != null && receiverEmail != null) {
         setState(() {
           _user = types.User(
-            id: email, // Use email as the user ID
-            firstName: email.split('@').first, // Extract the first part of the email for display
+            id: email,
+            firstName: email.split('@').first,
           );
-          _isLoading = false; // Mark initialization as complete
+          _currentReceiver = receiverEmail;
+          _isLoading = false;
         });
+
+        _loadMessages(); // Initial message load
+        _startMessageRefresh(); // Start periodic refresh
       } else {
-        throw Exception("No email found in secure storage.");
+        throw Exception("User or receiver email not found in storage.");
       }
     } catch (e) {
-      print("Error initializing user: $e");
+      print("Error initializing chat: $e");
       setState(() {
-        _isLoading = false; // Allow UI to display an error state
+        _isLoading = false;
       });
     }
   }
 
-  /// Add a message to the local message list
+  /// Periodically refresh messages every 5 seconds
+  void _startMessageRefresh() {
+    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _loadMessages();
+    });
+  }
+
+  /// Add a new message to the UI
   void _addMessage(types.Message message) {
     setState(() {
       _messages.insert(0, message);
     });
   }
 
-  /// Handle when the user sends a message
+  /// Handle sending a message
   void _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
-      author: _user, // Use `_user` as the message author
+      author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: const Uuid().v4(), // Generate a unique ID for this message
+      id: const Uuid().v4(),
       text: message.text,
     );
 
-    _addMessage(textMessage); // Add to the UI immediately
-    await _sendMessageToServer(textMessage); // Send to the server
+    _addMessage(textMessage);
+    await _sendMessageToServer(textMessage);
   }
 
-  /// Send the message to the server
+  /// Send a message to the server
   Future<void> _sendMessageToServer(types.TextMessage message) async {
     try {
       final response = await http.post(
-        Uri.parse('$serverurl/send_message'), // Adjust your server endpoint if needed
+        Uri.parse('$serverurl/send_message'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'text': message.text,
-          'author_id': message.author.id, // Use the `id` field from `types.User`
-          'receiver_id': _currentReceiver, // Use the current receiver from the text field
+          'author_id': message.author.id,
+          'receiver_id': _currentReceiver,
           'created_at': message.createdAt,
         }),
       );
@@ -92,32 +112,25 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   /// Load messages from the server
-  void _loadMessages(String authorId, String receiverId) async {
+  Future<void> _loadMessages() async {
     try {
       final response = await http.post(
         Uri.parse('$serverurl/get_messages'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'author_id': authorId, // Use the `id` field from `types.User`
-          'receiver_id': receiverId,
+          'author_id': _user.id,
+          'receiver_id': _currentReceiver,
         }),
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
-        print(responseData.toString());
-        // Map each message from the server to the expected `types.TextMessage` format
         final messages = responseData.map((message) {
-          final text = message['text'] ?? ''; // Use empty string if `text` is null
-          final authorId = message['author_id'] ?? 'unknown'; // Default ID if `author_id` is null
-          final createdAt = message['created_at'] ?? DateTime.now().millisecondsSinceEpoch;
-
-
           return types.TextMessage(
-            id: message['_id'] ?? '', // Use empty string if `_id` is null
-            author: types.User(id: authorId),
-            createdAt: createdAt,
-            text: text,
+            id: message['_id'] ?? '',
+            author: types.User(id: message['author_id']),
+            createdAt: message['created_at'] ?? DateTime.now().millisecondsSinceEpoch,
+            text: message['text'] ?? '',
           );
         }).toList();
 
@@ -132,58 +145,23 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  /// Build the chat page UI
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Chat')),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
+        title: Text('Chat with ' + _currentReceiver),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _receiverController,
-                    decoration: const InputDecoration(
-                      labelText: 'Receiver Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentReceiver = _receiverController.text;
-                      _loadMessages(_user.id, _currentReceiver);
-                    });
-                  },
-                  child: const Text('Load Chat'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Chat(
-              messages: _messages,
-              onSendPressed: _handleSendPressed,
-              user: _user,
-            ),
-          ),
-        ],
+      body: Chat(
+        messages: _messages,
+        onSendPressed: _handleSendPressed,
+        user: _user,
       ),
     );
   }

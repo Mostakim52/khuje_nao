@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:khuje_nao/report_lost_item_screen.dart';
 import 'package:khuje_nao/search_lost_item_screen.dart';
 import 'package:khuje_nao/login_screen.dart';
+import 'chat_page.dart';
+import 'chat_page_list.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   @override
@@ -73,6 +75,18 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
         appBar: AppBar(
           title: const Text('Activity Feed'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.chat),
+              onPressed: () {
+                // Navigate to the ChatPageList when the button is pressed
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPageList(), // Navigate to the chat list
+                  ),
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.logout),
               tooltip: 'Logout',
@@ -165,16 +179,51 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                   Text(
                                     item["description"] ?? "No description provided",
                                     style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
+                                        fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
                                     "Location: ${item["location"] ?? "Unknown"}",
                                     style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[700]),
+                                        fontSize: 14, color: Colors.grey[700]),
                                   ),
+                                  const SizedBox(height: 10),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      FutureBuilder<String?>(
+                                        future: _storage.read(key: "email"), // Fetch the current user email from storage
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return const SizedBox(); // Show an empty widget while loading
+                                          }
+
+                                          final currentUserEmail = snapshot.data;
+                                          final reportedByEmail = item["reported_by"] ?? "";
+
+                                          // Only show the button if the current user's email is not the same as the reported_by email
+                                          if (currentUserEmail != null && currentUserEmail != reportedByEmail) {
+                                            return ElevatedButton(
+                                              onPressed: () async {
+                                                // Save the receiver email to storage
+                                                await _storage.write(key: "receiver_email", value: reportedByEmail);
+
+                                                // Navigate to the ChatPage
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => ChatPage()),
+                                                );
+                                              },
+                                              child: const Text("Chat"),
+                                            );
+                                          } else {
+                                            return const SizedBox(); // Return an empty widget if the condition is not met
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  )
+
                                 ],
                               ),
                             ),

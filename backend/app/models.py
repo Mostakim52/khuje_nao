@@ -103,6 +103,8 @@ class LostItemModel:
             for item in items
         ]
 
+from bson.objectid import ObjectId
+
 class MessageModel:
     @staticmethod
     def send_message(data):
@@ -110,9 +112,19 @@ class MessageModel:
         return str(message_id)
 
     @staticmethod
-    def get_messages(chat_id, limit=50, skip=0):
+    def get_messages(author_id, receiver_id, limit=50, skip=0):
+        # Fetch messages where either:
+        # 1. The author sent a message to the receiver
+        # 2. The receiver sent a message to the author (bi-directional chat)
         messages = (
-            mongo.db.messages.find({"chat_id": chat_id})
+            mongo.db.messages.find(
+                {
+                    "$or": [
+                        {"author_id": author_id, "receiver_id": receiver_id},
+                        {"author_id": receiver_id, "receiver_id": author_id},
+                    ]
+                }
+            )
             .skip(skip)
             .limit(limit)
             .sort("created_at", -1)  # Sort by most recent first

@@ -193,10 +193,19 @@ def send_message():
 @main_bp.route('/get_messages', methods=['POST'])
 def get_messages():
     data = request.json
+    author_id = data.get("author_id")
+    receiver_id = data.get("receiver_id")
     limit = int(request.args.get("limit", 50))
     skip = int(request.args.get("skip", 0))
-    messages = MessageModel.get_messages(data.get("author_id"), data.get("receiver_id"), limit=limit, skip=skip)
+
+    messages = MessageModel.get_messages(author_id, receiver_id, limit=limit, skip=skip)
+    
+    # Convert ObjectId to string for JSON serialization
+    for message in messages:
+        message["_id"] = str(message["_id"])
+
     return jsonify(messages), 200
+
 
 # SendGrid API Client
 sg = sendgrid.SendGridAPIClient(api_key=os.getenv("SENDGRID_API_KEY"))  # Ensure the API key is set
@@ -271,3 +280,32 @@ def verify_otp():
         return jsonify({"message": "OTP verified successfully"}), 200
     else:
         return jsonify({"error": "Invalid OTP"}), 400
+
+from . import mongo
+@main_bp.route('/get_chats', methods=['POST'])
+def get_chats():
+    data = request.json
+    user_id = data.get("user_id")  # Current user ID/email
+
+    # Find all chats where the current user is either the author or the receiver
+    chats = mongo.db.messages.aggregate([
+        {"$match": {"$or": [{"author_id": user_id}, {"receiver_id": user_id}]}},
+        {"$group": {
+            "_id": {"$cond": [{"$eq": ["$author_id", user_id]}, "$receiver_id", "$author_id"]},
+            "latest_message": {"$last": "$$ROOT"}  # Get the latest message for each chat
+        }},
+        {"$project": {
+            "chat_id": "$_id",
+            "latest_message": 1
+        }}
+    ])
+
+    chat_list = []
+    for chat in chats:
+        chat_list.append({
+            "chat_id": chat["chat_id"],
+            "latest_message": chat["latest_message"]["text"],
+            "latest_message_time": chat["latest_message"]["created_at"],
+        })
+
+    return jsonify(chat_list), 200
