@@ -4,29 +4,41 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:khuje_nao/chat_page.dart'; // ChatPage is the actual chat page widget
 
+/// `ChatPageList` is a StatefulWidget that displays a list of ongoing chats for the current user.
+/// It fetches the list of chats from the backend and navigates to the `ChatPage` when a chat is tapped.
 class ChatPageList extends StatefulWidget {
   @override
-  _ChatPageListState createState() => _ChatPageListState();
+  ChatPageListState createState() => ChatPageListState();
 }
 
-class _ChatPageListState extends State<ChatPageList> {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+class ChatPageListState extends State<ChatPageList> {
+  /// Secure storage used to persist data such as the user's email.
+  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
+
+  /// List to hold the ongoing chats fetched from the server.
   List<Map<String, dynamic>> chats = [];
-  bool isLoading = true;
-  String? _currentUserEmail;
+
+  /// Loading state to show a loading indicator while fetching chat data.
+  bool is_loading = true;
+
+  /// Holds the current user's email.
+  String? curren_user_email;
 
   @override
   void initState() {
     super.initState();
-    _fetchChats();
+    fetchChats();
   }
 
-  // Fetch the list of ongoing chats from the backend
-  Future<void> _fetchChats() async {
+  /// Fetches the list of ongoing chats from the backend.
+  ///
+  /// This method retrieves the current user's email from secure storage, sends a request to the backend,
+  /// and populates the `chats` list with the response data.
+  Future<void> fetchChats() async {
     try {
-      final email = await _storage.read(key: "email");
+      final email = await STORAGE.read(key: "email");
       if (email != null) {
-        _currentUserEmail = email;
+        curren_user_email = email;
         final response = await http.post(
           Uri.parse('http://10.0.2.2:5000/get_chats'),
           headers: {'Content-Type': 'application/json'},
@@ -46,7 +58,7 @@ class _ChatPageListState extends State<ChatPageList> {
       print('Error fetching chats: $e');
     } finally {
       setState(() {
-        isLoading = false;
+        is_loading = false;
       });
     }
   }
@@ -57,7 +69,7 @@ class _ChatPageListState extends State<ChatPageList> {
       appBar: AppBar(
         title: const Text('Chats'),
       ),
-      body: isLoading
+      body: is_loading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
         itemCount: chats.length,
@@ -81,7 +93,7 @@ class _ChatPageListState extends State<ChatPageList> {
               ),
               onTap: () async {
                 // Navigate to the ChatPage when this chat is tapped
-                await _storage.write(key: "receiver_email", value: receiverEmail);
+                await STORAGE.write(key: "receiver_email", value: receiverEmail);
                 Navigator.push(
                   context,
                   MaterialPageRoute(

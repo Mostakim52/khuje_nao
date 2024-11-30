@@ -390,10 +390,11 @@ def send_lost_item_email(to_email, lost_items_count):
                 <div class="container">
                     <h1>Lost Item Notification</h1>
                     <p>Dear User,</p>
-                    <p><strong>{lost_items_count}</strong> lost item(s) are in NSU that you might want to check:</p>
+                    <p><strong>{lost_items_count}</strong> lost item(s) are in NSU that you might want to check.</p>
+                    <p>Visit Khuje Nao App to see more details.</p>
                     <p>If you find them, please report them back.</p>
                     <div class="footer">
-                        <p>&copy; {time.strftime('%Y')} SmartFreelanceHub. All rights reserved.</p>
+                        <p>&copy; {time.strftime('%Y')} Khuje Nao. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -405,7 +406,7 @@ def send_lost_item_email(to_email, lost_items_count):
 
     try:
         response = sg.send(mail)
-        print(f"Email sent with status code {response.status_code}")
+        ##print(f"Email sent with status code {response.status_code}")
     except Exception as e:
         print(f"Error sending email: {e}")
 

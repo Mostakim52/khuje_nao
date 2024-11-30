@@ -5,100 +5,126 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:async'; // For periodic updates
+import 'dart:async'; //# For periodic updates
 
+/// The `ChatPage` widget provides the interface for real-time communication between users.
+/// It handles message sending, message retrieval, and periodic refresh of messages.
 class ChatPage extends StatefulWidget {
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatPage> createState() => ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
-  List<types.Message> _messages = [];
-  final storage = const FlutterSecureStorage();
-  final serverurl = 'http://10.0.2.2:5000';
-  late types.User _user;
-  String _currentReceiver = '';
-  bool _isLoading = true;
-  Timer? _messageTimer; // Timer for periodic message refresh
+class ChatPageState extends State<ChatPage> {
+  /// List of messages to display in the chat.
+  List<types.Message> messages = [];
+
+  /// Secure storage for user data (e.g., email, receiver email).
+  final STORAGE = const FlutterSecureStorage();
+
+  /// The server URL for API requests.
+  final server_url = 'http://10.0.2.2:5000';
+
+  /// The current user.
+  late types.User user;
+
+  /// The email of the person being messaged (receiver).
+  String current_receiver = '';
+
+  /// Loading indicator for the page.
+  bool is_loading = true;
+
+  /// Timer to periodically refresh messages.
+  Timer? message_timer;
 
   @override
   void initState() {
     super.initState();
-    _initializeUser();
+    initializeUser();
   }
 
   @override
   void dispose() {
-    _messageTimer?.cancel(); // Cancel the timer when the widget is disposed
+    message_timer?.cancel(); //# Cancel the timer when the widget is disposed
     super.dispose();
   }
 
-  /// Initialize the user and load messages
-  Future<void> _initializeUser() async {
+  /// Initializes the user and loads messages.
+  ///
+  /// This method retrieves the user and receiver email from secure storage,
+  /// sets up the user information, and starts the periodic message refresh.
+  Future<void> initializeUser() async {
     try {
-      final email = await storage.read(key: "email");
-      final receiverEmail = await storage.read(key: "receiver_email");
+      final email = await STORAGE.read(key: "email");
+      final receiverEmail = await STORAGE.read(key: "receiver_email");
 
       if (email != null && receiverEmail != null) {
         setState(() {
-          _user = types.User(
+          user = types.User(
             id: email,
             firstName: email.split('@').first,
           );
-          _currentReceiver = receiverEmail;
-          _isLoading = false;
+          current_receiver = receiverEmail;
+          is_loading = false;
         });
 
-        _loadMessages(); // Initial message load
-        _startMessageRefresh(); // Start periodic refresh
+        loadMessages(); // Initial message load
+        startMessageRefresh(); // Start periodic refresh
       } else {
         throw Exception("User or receiver email not found in storage.");
       }
     } catch (e) {
       print("Error initializing chat: $e");
       setState(() {
-        _isLoading = false;
+        is_loading = false;
       });
     }
   }
 
-  /// Periodically refresh messages every 5 seconds
-  void _startMessageRefresh() {
-    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _loadMessages();
+  /// Starts periodic message refresh every 5 seconds.
+  ///
+  /// This method uses a timer to automatically refresh the messages at a regular interval.
+  void startMessageRefresh() {
+    message_timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      loadMessages();
     });
   }
 
-  /// Add a new message to the UI
-  void _addMessage(types.Message message) {
+  /// Adds a new message to the chat UI.
+  ///
+  /// [message] The message object that will be inserted at the top of the messages list.
+  void addMessage(types.Message message) {
     setState(() {
-      _messages.insert(0, message);
+      messages.insert(0, message);
     });
   }
 
-  /// Handle sending a message
-  void _handleSendPressed(types.PartialText message) async {
+  /// Handles the send button press by sending the message to the server.
+  ///
+  /// [message] The message content (partial text) to be sent.
+  void handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
-      author: _user,
+      author: user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: const Uuid().v4(),
       text: message.text,
     );
 
-    _addMessage(textMessage);
-    await _sendMessageToServer(textMessage);
+    addMessage(textMessage);
+    await sendMessageToServer(textMessage);
   }
 
-  /// Send a message to the server
-  Future<void> _sendMessageToServer(types.TextMessage message) async {
+  /// Sends the message to the server.
+  ///
+  /// [message] The message to be sent to the server.
+  Future<void> sendMessageToServer(types.TextMessage message) async {
     try {
       final response = await http.post(
-        Uri.parse('$serverurl/send_message'),
+        Uri.parse('$server_url/send_message'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'text': message.text,
           'author_id': message.author.id,
-          'receiver_id': _currentReceiver,
+          'receiver_id': current_receiver,
           'created_at': message.createdAt,
         }),
       );
@@ -111,21 +137,21 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  /// Load messages from the server
-  Future<void> _loadMessages() async {
+  /// Loads messages from the server based on the current user and receiver.
+  Future<void> loadMessages() async {
     try {
       final response = await http.post(
-        Uri.parse('$serverurl/get_messages'),
+        Uri.parse('$server_url/get_messages'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'author_id': _user.id,
-          'receiver_id': _currentReceiver,
+          'author_id': user.id,
+          'receiver_id': current_receiver,
         }),
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
-        final messages = responseData.map((message) {
+        final loaded_messages = responseData.map((message) {
           return types.TextMessage(
             id: message['_id'] ?? '',
             author: types.User(id: message['author_id']),
@@ -135,7 +161,7 @@ class _ChatPageState extends State<ChatPage> {
         }).toList();
 
         setState(() {
-          _messages = messages;
+          messages = loaded_messages;
         });
       } else {
         throw Exception('Failed to load messages');
@@ -147,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (is_loading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Chat')),
         body: const Center(child: CircularProgressIndicator()),
@@ -156,12 +182,12 @@ class _ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with ' + _currentReceiver),
+        title: Text('Chat with ' + current_receiver),
       ),
       body: Chat(
-        messages: _messages,
-        onSendPressed: _handleSendPressed,
-        user: _user,
+        messages: messages,
+        onSendPressed: handleSendPressed,
+        user: user,
       ),
     );
   }
