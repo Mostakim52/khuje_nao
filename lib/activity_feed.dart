@@ -17,11 +17,15 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'localization.dart';
 
+/// A screen that displays a feed of lost and found items.
+/// Allows users to report lost items, search for lost items, and chat about items.
+/// The screen shows two tabs: Lost Items and Found Items.
 class ActivityFeedPage extends StatefulWidget {
   @override
   _ActivityFeedPageState createState() => _ActivityFeedPageState();
 }
 
+/// The state for [ActivityFeedPage] that manages the feed data and user interactions.
 class _ActivityFeedPageState extends State<ActivityFeedPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> lostItems = [];
@@ -37,6 +41,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     fetchItems();
     _loadLanguage();
   }
+
+  /// Loads the stored language preference from secure storage.
   Future<void> _loadLanguage() async {
     String? storedLanguage = await _storage.read(key: 'language');
     setState(() {
@@ -44,7 +50,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     });
   }
 
-  /// Fetch lost and found items from the backend
+  /// Fetches lost and found items from the backend API.
   Future<void> fetchItems() async {
     try {
       setState(() {
@@ -65,8 +71,10 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
               json.decode(foundItemsResponse.body));
 
           // Initialize keys for each list item
-          _lostItemKeys = List.generate(lostItems.length, (index) => GlobalKey());
-          _foundItemKeys = List.generate(foundItems.length, (index) => GlobalKey());
+          _lostItemKeys = List.generate(
+              lostItems.length, (index) => GlobalKey());
+          _foundItemKeys = List.generate(
+              foundItems.length, (index) => GlobalKey());
         });
       } else {
         print('Failed to fetch items. Status code: ${lostItemsResponse.statusCode}');
@@ -80,6 +88,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     }
   }
 
+  /// Captures an image of the lost or found item and shares it.
   Future<void> _captureAndShareCard(GlobalKey key) async {
     try {
       // Wait until the widget has been fully rendered
@@ -118,8 +127,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     }
   }
 
-
-  /// Logout and redirect to login screen
+  /// Logs out the user by clearing the session and navigating to the login screen.
   Future<void> _logout() async {
     await _storage.deleteAll(); // Clear all stored session data
     Navigator.pushAndRemoveUntil(
@@ -129,6 +137,12 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     );
   }
 
+  /// Builds the main layout for the activity feed screen, which includes:
+  /// - A tab bar with two tabs: Lost Items and Found Items.
+  /// - A refresh button to reload the list of items.
+  /// - A chat button to navigate to the chat page.
+  /// - A logout button to log the user out.
+  /// - A list view for each tab displaying items with options to interact with them (mark as found, chat, share, etc.).
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

@@ -64,7 +64,7 @@
       
 
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">getString</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getString-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span>, </span></li>
+<span class="name ">getString</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getString-param-language_code"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">language_code</span>, </span></li>
 <li><span class="parameter" id="getString-param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">key</span></span></li>
 </ol>)
 
@@ -77,11 +77,11 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static String getString(String languageCode, String key) {
-  return localizedValues[languageCode]?[key]
-      ?? localizedValues[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
-      ?? key;
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">static String getString(String language_code, String key) {
+    return localizedValues[language_code]?[key]
+        ?? localizedValues[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
+        ?? key;
+    }</code></pre>
 </section>
 
 

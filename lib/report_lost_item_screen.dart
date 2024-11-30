@@ -5,7 +5,17 @@ import 'api_service.dart';
 import 'localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+/// A screen for reporting a lost item. It allows users to input a description,
+/// location, and an image of the lost item, which is then submitted to the backend.
+///
+/// The screen includes:
+/// - Fields for item description and location.
+/// - An option to select or capture an image of the lost item.
+/// - A submit button to send the report to the server.
+///
+/// The UI supports dynamic localization and language selection.
 class ReportLostItemScreen extends StatefulWidget {
+  /// Creates a new instance of the [ReportLostItemScreen].
   const ReportLostItemScreen({Key? key}) : super(key: key);
 
   @override
@@ -13,13 +23,32 @@ class ReportLostItemScreen extends StatefulWidget {
 }
 
 class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
+  /// Controller for the description text field.
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  String _language = 'en'; // Default language
 
+  /// Controller for the location text field.
+  final TextEditingController locationController = TextEditingController();
+
+  /// Holds the selected image file of the lost item.
+  File? _image;
+
+  /// An instance of [ImagePicker] to pick images from the camera or gallery.
+  final ImagePicker _picker = ImagePicker();
+
+  /// An instance of [FlutterSecureStorage] to securely store user preferences.
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  /// The language code for localization (default is 'en').
+  String _language = 'en';
+
+  /// Picks an image from the specified [source] (camera or gallery).
+  ///
+  /// If an image is successfully picked, it updates the state with the selected
+  /// image. If no image is selected, a snack bar will show an error message.
+  ///
+  /// [source] is the source from which the image is picked. This can be:
+  /// - [ImageSource.camera]: to pick an image using the camera.
+  /// - [ImageSource.gallery]: to pick an image from the gallery.
   Future<void> _pickImage(ImageSource source) async {
     try {
       final pickedFile = await _picker.pickImage(source: source);
@@ -30,7 +59,6 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalization.getString(_language, 'no_img'))),
-          //const SnackBar(content: Text('No image selected!')),
         );
       }
     } catch (e) {
@@ -39,11 +67,16 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
       );
     }
   }
+
   @override
   void initState() {
     super.initState();
     _loadLanguage();
   }
+
+  /// Loads the user's preferred language from secure storage.
+  ///
+  /// If no language is stored, it defaults to `'en'` (English).
   Future<void> _loadLanguage() async {
     String? storedLanguage = await _storage.read(key: 'language');
     setState(() {
@@ -51,16 +84,23 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
     });
   }
 
+  /// Submits the lost item report.
+  ///
+  /// This function checks if the description, location, and image are provided.
+  /// If any of these fields are empty, a snack bar is shown with an error message.
+  /// If everything is valid, a loading indicator is shown, and the report is sent
+  /// to the server via the [ApiService]. On success, a success message is shown,
+  /// and the screen is popped. On failure, an error message is displayed.
   Future<void> _submitReport() async {
     FocusScope.of(context).unfocus(); // Close the keyboard
     try {
       final description = descriptionController.text;
       final location = locationController.text;
 
+      // Check if all required fields are provided
       if (description.isEmpty || location.isEmpty || _image == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalization.getString(_language, 'req_fields'))),
-          //const SnackBar(content: Text('All fields are required!')),
         );
         return;
       }
@@ -74,6 +114,7 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
         ),
       );
 
+      // Submit the report to the server
       final success = await ApiService().reportLostItem(
         description: description,
         location: location,
@@ -85,13 +126,11 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalization.getString(_language, 'report_success'))),
-          //const SnackBar(content: Text('Report submitted successfully! Awaiting admin approval.')),
         );
         Navigator.pop(context); // Close the form screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalization.getString(_language, 'report_fail'))),
-          //const SnackBar(content: Text('Failed to submit report.')),
         );
       }
     } catch (e) {
@@ -106,7 +145,6 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalization.getString(_language, 'report_lost'))),
-      //appBar: AppBar(title: const Text('Report Lost Item')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -114,17 +152,14 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'item_desc')),
-              //decoration: const InputDecoration(labelText: 'Item Description'),
             ),
             TextField(
               controller: locationController,
               decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'found_loc')),
-              //decoration: const InputDecoration(labelText: 'Found Location'),
             ),
             const SizedBox(height: 10),
             _image == null
                 ? Text(AppLocalization.getString(_language, 'no_img'))
-                //? const Text('No image selected.')
                 : Image.file(_image!, height: 150, width: 150, fit: BoxFit.cover),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -132,12 +167,10 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
                 ElevatedButton(
                   onPressed: () => _pickImage(ImageSource.camera),
                   child: Text(AppLocalization.getString(_language, 'camera')),
-                  //child: const Text('Camera'),
                 ),
                 ElevatedButton(
                   onPressed: () => _pickImage(ImageSource.gallery),
                   child: Text(AppLocalization.getString(_language, 'gallery')),
-                  //child: const Text('Gallery'),
                 ),
               ],
             ),
@@ -145,7 +178,6 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
             ElevatedButton(
               onPressed: _submitReport,
               child: Text(AppLocalization.getString(_language, 'submit_report')),
-              //child: const Text('Submit Report'),
             ),
           ],
         ),

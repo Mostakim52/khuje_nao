@@ -82,30 +82,30 @@ Returns a boolean indicating success or failure</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; updateStatus(String itemId) async {
-  final url = Uri.parse(&#39;$serverurl&#47;lost-items&#47;$itemId&#47;found&#39;); &#47;&#47;  endpoint
+    final url = Uri.parse(&#39;$serverurl&#47;lost-items&#47;$itemId&#47;found&#39;); &#47;&#47;  endpoint
 
-  try {
+    try {
     &#47;&#47; Sending a POST request to mark the item as found
     final response = await http.post(
-      url,
-      headers: {
-        &#39;Content-Type&#39;: &#39;application&#47;json&#39;,
-      },
-      body: jsonEncode({}),  &#47;&#47; Empty body
+        url,
+        headers: {
+            &#39;Content-Type&#39;: &#39;application&#47;json&#39;,
+        },
+        body: jsonEncode({}),  &#47;&#47; Empty body
     );
 
-    &#47;&#47; Check if the update was successful
+  &#47;&#47; Check if the update was successful
     if (response.statusCode == 200) {
-      print(&quot;Item marked as found.&quot;);
-      return true; &#47;&#47; Success
+        print(&quot;Item marked as found.&quot;);
+        return true; &#47;&#47; Success
     } else {
-      print(&#39;Failed to update status: ${response.body}&#39;);
-      return false; &#47;&#47; Failure
-    }
-  } catch (e) {
-    print(&#39;Error updating status: $e&#39;);
-    return false; &#47;&#47; Failure
+        print(&#39;Failed to update status: ${response.body}&#39;);
+        return false; &#47;&#47; Failure
   }
+    } catch (e) {
+        print(&#39;Error updating status: $e&#39;);
+        return false; &#47;&#47; Failure
+    }
 }</code></pre>
 </section>
 
