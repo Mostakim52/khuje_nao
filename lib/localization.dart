@@ -1,7 +1,12 @@
-
+/// A class that handles the localization of strings in different languages.
 
 class AppLocalization {
-    // A map to store all strings for different languages
+    /// A map that stores localized strings for different languages.
+    ///
+    /// The keys are language codes (e.g., 'en' for English, 'bd' for Bengali),
+    /// and the values are maps of key-value pairs where the key is a string
+    /// representing a specific item or message, and the value is the localized
+    /// string for that item in the corresponding language.
     static final Map<String, Map<String, String>> localizedValues = {
         'en': {
             'camera'         : 'Camera',
@@ -101,7 +106,17 @@ class AppLocalization {
             }
     };
 
-  // Method to get the string for the given key and language code
+/// Method to get the string for the given key and language code
+/// Returns the localized string for the given [key] and [language_code].
+///
+/// If the [key] is not found in the provided [language_code], the method
+/// will return the string from the default language ('en'). If the [key]
+/// does not exist in the default language, the method will return the [key] itself.
+///
+/// [language_code] The language code (e.g., 'en', 'bd').
+/// [key] The key representing the string to be retrieved.
+///
+/// Returns the localized string for the [key] in the specified language.
   static String getString(String language_code, String key) {
       return localizedValues[language_code]?[key]
           ?? localizedValues['en']?[key]            //returns default language en if key is invalid
