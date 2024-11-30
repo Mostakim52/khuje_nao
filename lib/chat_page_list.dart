@@ -13,7 +13,8 @@ class ChatPageList extends StatefulWidget {
 
 class ChatPageListState extends State<ChatPageList> {
   /// Secure storage used to persist data such as the user's email.
-  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
+  late FlutterSecureStorage STORAGE = const FlutterSecureStorage();
+  http.Client httpClient = http.Client();
 
   /// List to hold the ongoing chats fetched from the server.
   List<Map<String, dynamic>> chats = [];
@@ -28,6 +29,15 @@ class ChatPageListState extends State<ChatPageList> {
   void initState() {
     super.initState();
     fetchChats();
+  }
+
+  // Allow mock injection via setter
+  void setStorage(FlutterSecureStorage storage) {
+    STORAGE = storage;
+  }
+
+  void setHttpClient(http.Client client) {
+    httpClient = client;
   }
 
   /// Fetches the list of ongoing chats from the backend.

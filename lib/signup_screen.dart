@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:khuje_nao/login_screen.dart';
 import 'api_service.dart';
 import 'localization.dart';
 
@@ -92,7 +93,10 @@ class SignupScreenState extends State<SignupScreen> {
         case -5: showResponseDialog(AppLocalization.getString(language, "invalid_phone"));
         case -6: showResponseDialog(AppLocalization.getString(language, "signup_fail"));
         case 0: showResponseDialog("Sign Up Successful");
-        Navigator.pop(context); // Go back after successful sign-up
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
       }
     }
   }

@@ -42,15 +42,15 @@ class NotificationService {
   /// Sends a notification with two action buttons.
   ///
   /// [message] is the body of the notification.
-  /// [button1Text] and [button2Text] are the labels for the action buttons.
+  /// [button_1_Text] and [button_2_Text] are the labels for the action buttons.
   ///
   /// This method creates and sends a notification with the following:
   /// - A notification title of "Notification".
   /// - A body text defined by the [message] parameter.
-  /// - Two buttons, with labels provided by the [button1Text] and [button2Text] parameters.
+  /// - Two buttons, with labels provided by the [button_1_Text] and [button_2_Text] parameters.
   ///
   /// \note This method is used to send custom notifications with interactive action buttons.
-  static Future<void> sendNotification(String message, String button1Text, String button2Text) async {
+  static Future<void> sendNotification(String message, String button_1_Text, String button_2_Text) async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 10, ///< \brief Unique identifier for the notification.
@@ -62,11 +62,11 @@ class NotificationService {
       actionButtons: [
         NotificationActionButton(
           key: 'BUTTON1', ///< \brief Unique key for the first action button.
-          label: button1Text, ///< \brief Label text displayed on the first button.
+          label: button_1_Text, ///< \brief Label text displayed on the first button.
         ),
         NotificationActionButton(
           key: 'BUTTON2', ///< \brief Unique key for the second action button.
-          label: button2Text, ///< \brief Label text displayed on the second button.
+          label: button_2_Text, ///< \brief Label text displayed on the second button.
         ),
       ],
     );

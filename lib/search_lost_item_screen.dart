@@ -151,6 +151,17 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              Text(
+                                item["description"] ?? "No description provided",
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                "Location: ${item["location"] ?? "Unknown"}",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.grey[700]),
+                              ),
                               // FutureBuilder to fetch the current user email and decide whether to show "Chat" or "Mark as Found" button
                               FutureBuilder<String?>(
                                 future: _storage.read(key: "email"), // Fetch current user email
