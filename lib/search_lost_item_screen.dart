@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_service.dart';
 import 'chat_page.dart';
+import 'localization.dart';
 
 class SearchLostItemsScreen extends StatefulWidget {
   const SearchLostItemsScreen({Key? key}) : super(key: key);
@@ -15,7 +16,18 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
   List<Map<String, dynamic>> _searchResults = [];
   bool isLoading = false;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-
+  String _language = 'en'; // Default language
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+  Future<void> _loadLanguage() async {
+    String? storedLanguage = await _storage.read(key: 'language');
+    setState(() {
+      _language = storedLanguage ?? 'en';
+    });
+  }
   Future<void> _searchItems() async {
     try {
       final query = queryController.text;
@@ -48,19 +60,22 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search Lost Items')),
+      appBar: AppBar(title: Text(AppLocalization.getString(_language, 'search_lost'))),
+      //appBar: AppBar(title: const Text('Search Lost Items')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: queryController,
-              decoration: const InputDecoration(labelText: 'Search Query'),
+              decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'search_query')),
+              //decoration: const InputDecoration(labelText: 'Search Query'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _searchItems,
-              child: const Text('Search'),
+              child: Text(AppLocalization.getString(_language, 'search')),
+             // child: const Text('Search'),
             ),
             const SizedBox(height: 20),
             isLoading

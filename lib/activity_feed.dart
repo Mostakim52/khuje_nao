@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart'; // For temporary directory
 import 'package:share_plus/share_plus.dart'; // For sharing
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
+import 'localization.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   @override
@@ -27,12 +28,20 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   List<Map<String, dynamic>> foundItems = [];
   List<GlobalKey> _lostItemKeys = []; // List of keys for lost items
   List<GlobalKey> _foundItemKeys = []; // List of keys for found items
+  String _language = 'en'; // Default language
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     fetchItems();
+    _loadLanguage();
+  }
+  Future<void> _loadLanguage() async {
+    String? storedLanguage = await _storage.read(key: 'language');
+    setState(() {
+      _language = storedLanguage ?? 'en';
+    });
   }
 
   /// Fetch lost and found items from the backend
@@ -96,7 +105,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             final XFile xFile = XFile(imagePath);
             await Share.shareXFiles(
               [xFile],
-              text: 'Check out this lost item!',
+              text: AppLocalization.getString(_language, 'share_msg'),
+              //text: 'Check out this lost item!',
             );
           }
         } catch (e) {
@@ -125,7 +135,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       length: 2, // Two tabs: Lost Items and Found Items
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Activity Feed'),
+          title: Text(AppLocalization.getString(_language, 'feed')),
+          //title: const Text('Activity Feed'),
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh), // Refresh icon
@@ -171,7 +182,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             const ReportLostItemScreen()),
                       );
                     },
-                    child: const Text('Report Lost Item'),
+                    child: Text(AppLocalization.getString(_language,"report_lost")),
+                    //child: const Text('Report Lost Item'),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -182,16 +194,19 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             const SearchLostItemsScreen()),
                       );
                     },
-                    child: const Text('Search Item'),
+                    child: Text(AppLocalization.getString(_language, 'search_items')),
+                    //child: const Text('Search Item'),
                   ),
                 ],
               ),
             ),
             // TabBar
-            const TabBar(
+             TabBar(
               tabs: [
-                Tab(text: "Lost Items"),
-                Tab(text: "Found Items"),
+                Tab(text: AppLocalization.getString(_language, 'lost_items')),
+                Tab(text: AppLocalization.getString(_language, 'found_items')),
+                //Tab(text: "Lost Items"),
+               // Tab(text: "Found Items"),
               ],
             ),
             // Expanded TabBarView to fill the rest of the screen
@@ -284,10 +299,12 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                                   await ApiService().markItemAsFound(itemId);
                                                   // Optionally show a confirmation dialog or refresh the list
                                                   ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('Item marked as found')),
+                                                    SnackBar(content: Text(AppLocalization.getString(_language, 'mark_msg'))),
+                                                    //const SnackBar(content: Text('Item marked as found')),
                                                   );
                                                 },
-                                                child: const Text("Mark as Found"),
+                                                child: Text(AppLocalization.getString(_language, 'mark_found')),
+                                                //child: const Text("Mark as Found"),
                                               );
                                           }
                                         },
@@ -301,7 +318,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                         onPressed: () async {
                                           await _captureAndShareCard(_lostItemKeys[index]);  // Share the card content
                                         },
-                                        child: const Text("Share"),
+                                        child: Text(AppLocalization.getString(_language, 'share')),
+                                        //child: const Text("Share"),
                                       ),
                                     ],
                                   ),
@@ -373,7 +391,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                         onPressed: () async {
                                           await _captureAndShareCard(_foundItemKeys[index]);  // Share the card content
                                         },
-                                        child: const Text("Share"),
+                                        child: Text(AppLocalization.getString(_language, 'share')),
+                                        //child: const Text("Share"),
                                       ),
                                     ],
                                   ),
