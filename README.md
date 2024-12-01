@@ -42,13 +42,7 @@ flutter run
 ```
 ### Backend imports
 ```
-You can also do 'pip install requirements.txt' to install backend dpeendencies
-Use python 3.9
-pip install flask
-pip install Flask-Cors
-pip install Flask-PyMongo
-pip install python-dotenv
-pip install sendgrid
+Use 'pip install -r requirements.txt' to install backend dependencies
 ```
 
 ### Backend SendGrid API
