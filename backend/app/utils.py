@@ -15,3 +15,7 @@ def is_valid_phone_number(phone_number):
 
 def is_valid_nsu_id(nsu_id):
     return re.fullmatch(r"\d{7}", nsu_id) is not None
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
