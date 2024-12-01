@@ -189,7 +189,7 @@ class LostItemModel:
             list: A list of lost items with their details.
         """
         items = (
-            mongo.db.lost_items.find({"is_found": False})
+            mongo.db.lost_items.find({"is_found": False, "is_approved": True})
             .skip(skip)
             .limit(limit)
             .sort("created_at", -1)

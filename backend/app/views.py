@@ -115,7 +115,6 @@ def report_lost_item():
     @return: JSON response with success message or error.
     """
     image_path = None
-
     # Handling image upload
     if 'image' in request.files:
         file = request.files['image']
