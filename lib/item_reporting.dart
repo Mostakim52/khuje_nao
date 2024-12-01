@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 /// A service class responsible for updating the status of lost items.
 class ChangeStatusService {
     // Base URL of Flask backend
-    final serverurl = 'http://10.0.2.2:5000';
+    final server_url = 'https://alien-witty-monitor.ngrok-free.app';
 
     /// Updates the `is_found` status of a lost item in the database.
     ///
@@ -18,7 +18,7 @@ class ChangeStatusService {
     /// - `true` if the status update was successful (HTTP status 200).
     /// - `false` if the status update failed or an error occurred.
     Future<bool> updateStatus(String itemId) async {
-        final url = Uri.parse('$serverurl/lost-items/$itemId/found'); //  endpoint
+        final url = Uri.parse('$server_url/lost-items/$itemId/found'); //  endpoint
 
         try {
         // Sending a POST request to mark the item as found

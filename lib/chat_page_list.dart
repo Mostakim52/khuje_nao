@@ -14,7 +14,10 @@ class ChatPageList extends StatefulWidget {
 class ChatPageListState extends State<ChatPageList> {
   /// Secure storage used to persist data such as the user's email.
   late FlutterSecureStorage STORAGE = const FlutterSecureStorage();
-  http.Client httpClient = http.Client();
+  http.Client http_client = http.Client();
+
+  /// The server URL for API requests.
+  final base_url = 'https://alien-witty-monitor.ngrok-free.app';
 
   /// List to hold the ongoing chats fetched from the server.
   List<Map<String, dynamic>> chats = [];
@@ -37,7 +40,7 @@ class ChatPageListState extends State<ChatPageList> {
   }
 
   void setHttpClient(http.Client client) {
-    httpClient = client;
+    http_client = client;
   }
 
   /// Fetches the list of ongoing chats from the backend.
@@ -50,7 +53,7 @@ class ChatPageListState extends State<ChatPageList> {
       if (email != null) {
         curren_user_email = email;
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:5000/get_chats'),
+          Uri.parse('$base_url/get_chats'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'user_id': email}),
         );

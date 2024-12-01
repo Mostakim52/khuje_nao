@@ -22,7 +22,7 @@ class ChatPageState extends State<ChatPage> {
   final STORAGE = const FlutterSecureStorage();
 
   /// The server URL for API requests.
-  final server_url = 'http://10.0.2.2:5000';
+  final base_url = 'https://alien-witty-monitor.ngrok-free.app';
 
   /// The current user.
   late types.User user;
@@ -119,7 +119,7 @@ class ChatPageState extends State<ChatPage> {
   Future<void> sendMessageToServer(types.TextMessage message) async {
     try {
       final response = await http.post(
-        Uri.parse('$server_url/send_message'),
+        Uri.parse('$base_url/send_message'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'text': message.text,
@@ -141,7 +141,7 @@ class ChatPageState extends State<ChatPage> {
   Future<void> loadMessages() async {
     try {
       final response = await http.post(
-        Uri.parse('$server_url/get_messages'),
+        Uri.parse('$base_url/get_messages'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'author_id': user.id,

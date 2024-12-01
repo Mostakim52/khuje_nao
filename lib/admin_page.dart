@@ -8,46 +8,46 @@ import 'package:khuje_nao/api_service.dart';
 /// It fetches a list of lost items from the backend and displays them with options to approve or refresh the list.
 class AdminPage extends StatefulWidget {
   @override
-  _AdminPageState createState() => _AdminPageState();
+  AdminPageState createState() => AdminPageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class AdminPageState extends State<AdminPage> {
   /// A list of lost items fetched from the backend server.
-  List<dynamic> _lostItems = [];
+  List<dynamic> lost_items = [];
 
   /// A boolean flag to indicate if the lost items are loading.
-  bool _isLoading = true;
+  bool is_loading = true;
 
   /// The base URL of the backend server.
-  final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
+  final String base_url = 'https://alien-witty-monitor.ngrok-free.app'; // Replace with your backend URL
 
   /// An instance of the `ApiService` for making API calls.
-  final ApiService apiService = ApiService();
+  final ApiService api_service = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _fetchLostItems();
+    fetchLostItems();
   }
 
   /// Fetches the lost items from the backend and updates the state.
   ///
   /// This method sends a GET request to the backend and updates the list of lost items
   /// once the data is successfully fetched.
-  Future<void> _fetchLostItems() async {
-    final url = '$baseUrl/lost-items-admin'; // Replace with your server URL
+  Future<void> fetchLostItems() async {
+    final url = '$base_url/lost-items-admin'; // Replace with your server URL
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         setState(() {
-          _lostItems = json.decode(response.body);
-          _isLoading = false;
+          lost_items = json.decode(response.body);
+          is_loading = false;
         });
       } else {
-        _showError('Failed to load items.');
+        showError('Failed to load items.');
       }
     } catch (e) {
-      _showError('Error: $e');
+      showError('Error: $e');
     }
   }
 
@@ -55,25 +55,25 @@ class _AdminPageState extends State<AdminPage> {
   ///
   /// This method takes the item ID, sends a POST request to approve the item, and refreshes
   /// the list of items once the approval is successful.
-  Future<void> _approveItem(String itemId) async {
-    final url = '$baseUrl/lost-items/$itemId/approve'; // Replace with your server URL
+  Future<void> approveItem(String itemId) async {
+    final url = '$base_url/lost-items/$itemId/approve'; // Replace with your server URL
     try {
       final response = await http.post(Uri.parse(url));
       if (response.statusCode == 200) {
-        _showMessage('Item approved successfully.');
-        _fetchLostItems(); // Refresh the list after approval
+        showMessage('Item approved successfully.');
+        fetchLostItems(); // Refresh the list after approval
       } else {
-        _showError('Failed to approve item.');
+        showError('Failed to approve item.');
       }
     } catch (e) {
-      _showError('Error: $e');
+      showError('Error: $e');
     }
   }
 
   /// Displays an error message in a snackbar.
   ///
   /// This method is used to show error messages to the user via a snackbar.
-  void _showError(String message) {
+  void showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message, style: TextStyle(color: Colors.red))),
     );
@@ -82,7 +82,7 @@ class _AdminPageState extends State<AdminPage> {
   /// Displays a success message in a snackbar.
   ///
   /// This method is used to show success messages to the user via a snackbar.
-  void _showMessage(String message) {
+  void showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -97,12 +97,12 @@ class _AdminPageState extends State<AdminPage> {
             IconButton(
               icon: const Icon(Icons.refresh), // Refresh icon
               onPressed: () {
-                _fetchLostItems(); // Trigger refresh when pressed
+                fetchLostItems(); // Trigger refresh when pressed
               },
             ),
             ElevatedButton(
               onPressed: () {
-                apiService.sendEmails();
+                api_service.sendEmails();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Emails submitted successfully.')),
                 );
@@ -110,12 +110,12 @@ class _AdminPageState extends State<AdminPage> {
               child: const Text('Send Emails'),
             ),
   ]),
-      body: _isLoading
+      body: is_loading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-        itemCount: _lostItems.length,
+        itemCount: lost_items.length,
         itemBuilder: (context, index) {
-          final item = _lostItems[index];
+          final item = lost_items[index];
           return Card(
             child: ListTile(
               leading: item['image'] != null
@@ -124,7 +124,7 @@ class _AdminPageState extends State<AdminPage> {
               title: Text(item['description'] ?? 'No description'),
               subtitle: Text('Location: ${item['location'] ?? 'Unknown'}'),
               trailing: ElevatedButton(
-                onPressed: () => _approveItem(item['_id'].toString()), // Approve button
+                onPressed: () => approveItem(item['_id'].toString()), // Approve button
                 child: Text('Approve'),
               ),
             ),
