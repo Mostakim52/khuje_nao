@@ -1,5 +1,9 @@
-flask
-Flask-Cors
+Flask
 Flask-PyMongo
+Flask-CORS
+SendGrid
 python-dotenv
-sendgrid
+bcrypt
+pymongo
+bson
+werkzeug
