@@ -1,0 +1,382 @@
+\doxysection{app.\+views Namespace Reference}
+\hypertarget{namespaceapp_1_1views}{}\label{namespaceapp_1_1views}\index{app.views@{app.views}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_ac00a06eb73c0b5e5197d7f41f8f6d874}{allowed\+\_\+file}} (filename)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a422ab11fdc758b5002fa029fa22e7bb4}{create\+\_\+user}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a857319493c153fec2edba37e9eb2c736}{login}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_ae3e7aa7165ad8c5169fe5d621bea34a8}{signup}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a8ffb428c6387d294ee15227b73492a92}{uploaded\+\_\+file}} (filename)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a245dd0bb5df1066a90bb57012f53dc6c}{report\+\_\+lost\+\_\+item}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a2191117abf06bad52c9db5a69369b9a9}{get\+\_\+lost\+\_\+items}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_af5d0c0b9c5161c988f29811d995e7fb6}{report\+\_\+found\+\_\+item}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a322978c3c7af7dadab42878654c20cc1}{mark\+\_\+item\+\_\+as\+\_\+found}} (item\+\_\+id)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a9f2041ed8e0aaf5c203142f4d9a5e5ee}{get\+\_\+found\+\_\+items}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a27cdbd80e9488b2ead9e182df644d29f}{activity\+\_\+feed}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a5230f1c0b78e267e6810c94e77b3fd3b}{generate\+\_\+otp}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_ad656b58adbad6b81a8fe77f5baa01be4}{send\+\_\+otp\+\_\+email}} (to\+\_\+email, otp)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_afda9c2cf94cfbc8ff246ba8aacc9aa1a}{send\+\_\+message}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a7b641d7654c086d9a397f5941c488f94}{get\+\_\+messages}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_ac5358bc7cc3a20e0d8867d42c2c55c1a}{send\+\_\+otp}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a0d986a8d0acfaea5573bc5872fc0ba43}{verify\+\_\+otp}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_aa885eb84e30cc7447b78ebdb0947e528}{get\+\_\+chats}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a53c854a87216379b9a3fc39239ca79da}{search\+\_\+lost\+\_\+items}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a58b48e8be6a274df63cdd97e0fbd3406}{send\+\_\+lost\+\_\+item\+\_\+email}} (to\+\_\+email, lost\+\_\+items\+\_\+count)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_aa05623cb4c0e03de7ca301201d87685c}{send\+\_\+lost\+\_\+items\+\_\+email}} ()
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a3c2e492bae70a02d497572b522155919}{approve\+\_\+item}} (item\+\_\+id)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a0cf5b656c34268d6eab39b7ca16fe918}{get\+\_\+lost\+\_\+items\+\_\+admin}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a0fe5d51a1aaf6cbbbc05527fc127c11f}{main\+\_\+bp}} = Blueprint("{}main"{}, \+\_\+\+\_\+name\+\_\+\+\_\+)
+\item 
+dict \mbox{\hyperlink{namespaceapp_1_1views_a0ac2a860f5768536e463820f6d068aad}{ALLOWED\+\_\+\+EXTENSIONS}} = \{\textquotesingle{}png\textquotesingle{}, \textquotesingle{}jpg\textquotesingle{}, \textquotesingle{}jpeg\textquotesingle{}\}
+\item 
+\mbox{\hyperlink{namespaceapp_1_1views_a9b90fac8ec22b313bd9d85ebaa7b50d1}{sg}} = sendgrid.\+Send\+Grid\+APIClient(api\+\_\+key=os.\+getenv("{}SENDGRID\+\_\+\+API\+\_\+\+KEY"{}))
+\item 
+dict \mbox{\hyperlink{namespaceapp_1_1views_a102113e9a88c80ecf096474313074e8f}{otp\+\_\+storage}} = \{\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceapp_1_1views_a27cdbd80e9488b2ead9e182df644d29f}\index{app.views@{app.views}!activity\_feed@{activity\_feed}}
+\index{activity\_feed@{activity\_feed}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{activity\_feed()}{activity\_feed()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a27cdbd80e9488b2ead9e182df644d29f} 
+app.\+views.\+activity\+\_\+feed (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve a feed of recent lost items.
+
+This endpoint returns a paginated list of recent lost items. It includes an optional `limit` 
+query parameter for pagination.
+
+@return: JSON response with activity feed.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_ac00a06eb73c0b5e5197d7f41f8f6d874}\index{app.views@{app.views}!allowed\_file@{allowed\_file}}
+\index{allowed\_file@{allowed\_file}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{allowed\_file()}{allowed\_file()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_ac00a06eb73c0b5e5197d7f41f8f6d874} 
+app.\+views.\+allowed\+\_\+file (\begin{DoxyParamCaption}\item[{}]{filename}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Checks if the file extension is allowed.
+
+@param filename: The name of the file to check.
+@return: True if the file extension is allowed, otherwise False.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a3c2e492bae70a02d497572b522155919}\index{app.views@{app.views}!approve\_item@{approve\_item}}
+\index{approve\_item@{approve\_item}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{approve\_item()}{approve\_item()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a3c2e492bae70a02d497572b522155919} 
+app.\+views.\+approve\+\_\+item (\begin{DoxyParamCaption}\item[{}]{item\+\_\+id}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to approve a lost item.
+
+This endpoint accepts an `item_id` and updates the item to mark it as approved.
+
+@param item_id: The ID of the lost item to approve.
+
+@return: JSON response indicating the result of the approval operation.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a422ab11fdc758b5002fa029fa22e7bb4}\index{app.views@{app.views}!create\_user@{create\_user}}
+\index{create\_user@{create\_user}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{create\_user()}{create\_user()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a422ab11fdc758b5002fa029fa22e7bb4} 
+app.\+views.\+create\+\_\+user (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to create a new user.
+
+This endpoint expects a JSON body with `username`, `email`, and `password`. 
+It checks if the user already exists by email. If not, it hashes the password 
+and creates the user in the database.
+
+@return: JSON response with success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a5230f1c0b78e267e6810c94e77b3fd3b}\index{app.views@{app.views}!generate\_otp@{generate\_otp}}
+\index{generate\_otp@{generate\_otp}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{generate\_otp()}{generate\_otp()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a5230f1c0b78e267e6810c94e77b3fd3b} 
+app.\+views.\+generate\+\_\+otp (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Generates a 6-digit One-Time Password (OTP).
+
+@return: A randomly generated 6-digit OTP.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_aa885eb84e30cc7447b78ebdb0947e528}\index{app.views@{app.views}!get\_chats@{get\_chats}}
+\index{get\_chats@{get\_chats}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{get\_chats()}{get\_chats()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_aa885eb84e30cc7447b78ebdb0947e528} 
+app.\+views.\+get\+\_\+chats (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve all chats for a user.
+
+This endpoint expects a JSON body with `user_id`, representing the current user. 
+It returns a list of chats where the user is either the author or receiver of messages.
+
+@return: JSON response with the list of chats.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a9f2041ed8e0aaf5c203142f4d9a5e5ee}\index{app.views@{app.views}!get\_found\_items@{get\_found\_items}}
+\index{get\_found\_items@{get\_found\_items}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{get\_found\_items()}{get\_found\_items()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a9f2041ed8e0aaf5c203142f4d9a5e5ee} 
+app.\+views.\+get\+\_\+found\+\_\+items (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve found items.
+
+This endpoint returns a paginated list of found items. It includes optional `limit` and `skip` 
+query parameters for pagination. If an item has an image, the image URL is also included.
+
+@return: JSON response with list of found items.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a2191117abf06bad52c9db5a69369b9a9}\index{app.views@{app.views}!get\_lost\_items@{get\_lost\_items}}
+\index{get\_lost\_items@{get\_lost\_items}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{get\_lost\_items()}{get\_lost\_items()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a2191117abf06bad52c9db5a69369b9a9} 
+app.\+views.\+get\+\_\+lost\+\_\+items (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve lost items.
+
+This endpoint returns a paginated list of lost items. It includes optional `limit` and `skip` 
+query parameters for pagination. If an item has an image, the image URL is also included.
+
+@return: JSON response with list of lost items.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a0cf5b656c34268d6eab39b7ca16fe918}\index{app.views@{app.views}!get\_lost\_items\_admin@{get\_lost\_items\_admin}}
+\index{get\_lost\_items\_admin@{get\_lost\_items\_admin}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{get\_lost\_items\_admin()}{get\_lost\_items\_admin()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a0cf5b656c34268d6eab39b7ca16fe918} 
+app.\+views.\+get\+\_\+lost\+\_\+items\+\_\+admin (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve a list of lost items for the admin.
+
+This endpoint returns a paginated list of lost items, with optional `limit` and `skip` query parameters.
+
+@return: JSON response with the list of lost items for the admin.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a7b641d7654c086d9a397f5941c488f94}\index{app.views@{app.views}!get\_messages@{get\_messages}}
+\index{get\_messages@{get\_messages}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{get\_messages()}{get\_messages()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a7b641d7654c086d9a397f5941c488f94} 
+app.\+views.\+get\+\_\+messages (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to retrieve messages between two users.
+
+This endpoint expects a JSON body with `author_id` and `receiver_id`. 
+It returns a paginated list of messages with optional `limit` and `skip` query parameters.
+
+@return: JSON response with the list of messages.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a857319493c153fec2edba37e9eb2c736}\index{app.views@{app.views}!login@{login}}
+\index{login@{login}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{login()}{login()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a857319493c153fec2edba37e9eb2c736} 
+app.\+views.\+login (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint for user login.
+
+This endpoint expects a JSON body with `email` and `password`. It checks if the user exists 
+and if the provided password matches. If successful, it returns a success message.
+
+@return: JSON response with login success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a322978c3c7af7dadab42878654c20cc1}\index{app.views@{app.views}!mark\_item\_as\_found@{mark\_item\_as\_found}}
+\index{mark\_item\_as\_found@{mark\_item\_as\_found}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{mark\_item\_as\_found()}{mark\_item\_as\_found()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a322978c3c7af7dadab42878654c20cc1} 
+app.\+views.\+mark\+\_\+item\+\_\+as\+\_\+found (\begin{DoxyParamCaption}\item[{}]{item\+\_\+id}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to mark a lost item as found.
+
+This endpoint moves the item from the `lost_items` collection to the `found_items` collection.
+
+@param item_id: The ID of the lost item to mark as found.
+@return: JSON response with success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_af5d0c0b9c5161c988f29811d995e7fb6}\index{app.views@{app.views}!report\_found\_item@{report\_found\_item}}
+\index{report\_found\_item@{report\_found\_item}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{report\_found\_item()}{report\_found\_item()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_af5d0c0b9c5161c988f29811d995e7fb6} 
+app.\+views.\+report\+\_\+found\+\_\+item (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to report a found item.
+
+This endpoint accepts a JSON body with the description, location, and image path of the found item.
+It saves the found item in the database.
+
+@return: JSON response with success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a245dd0bb5df1066a90bb57012f53dc6c}\index{app.views@{app.views}!report\_lost\_item@{report\_lost\_item}}
+\index{report\_lost\_item@{report\_lost\_item}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{report\_lost\_item()}{report\_lost\_item()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a245dd0bb5df1066a90bb57012f53dc6c} 
+app.\+views.\+report\+\_\+lost\+\_\+item (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to report a lost item.
+
+This endpoint accepts form data to report a lost item. It handles image uploads, 
+validates required fields, and saves the lost item in the database.
+
+@return: JSON response with success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a53c854a87216379b9a3fc39239ca79da}\index{app.views@{app.views}!search\_lost\_items@{search\_lost\_items}}
+\index{search\_lost\_items@{search\_lost\_items}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{search\_lost\_items()}{search\_lost\_items()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a53c854a87216379b9a3fc39239ca79da} 
+app.\+views.\+search\+\_\+lost\+\_\+items (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to search for lost items.
+
+This endpoint performs a text search on the `description` field of lost items and returns 
+the matching items. It accepts a `query` parameter.
+
+@return: JSON response with the list of lost items that match the search query.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a58b48e8be6a274df63cdd97e0fbd3406}\index{app.views@{app.views}!send\_lost\_item\_email@{send\_lost\_item\_email}}
+\index{send\_lost\_item\_email@{send\_lost\_item\_email}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{send\_lost\_item\_email()}{send\_lost\_item\_email()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a58b48e8be6a274df63cdd97e0fbd3406} 
+app.\+views.\+send\+\_\+lost\+\_\+item\+\_\+email (\begin{DoxyParamCaption}\item[{}]{to\+\_\+email}{, }\item[{}]{lost\+\_\+items\+\_\+count}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Sends a notification email about the number of lost items.
+
+@param to_email: The recipient's email address.
+@param lost_items_count: The number of lost items to report.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_aa05623cb4c0e03de7ca301201d87685c}\index{app.views@{app.views}!send\_lost\_items\_email@{send\_lost\_items\_email}}
+\index{send\_lost\_items\_email@{send\_lost\_items\_email}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{send\_lost\_items\_email()}{send\_lost\_items\_email()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_aa05623cb4c0e03de7ca301201d87685c} 
+app.\+views.\+send\+\_\+lost\+\_\+items\+\_\+email (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to send a notification email about lost items to all users.
+
+This endpoint fetches the count of lost items and sends an email to all registered users
+notifying them of the number of lost items.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_afda9c2cf94cfbc8ff246ba8aacc9aa1a}\index{app.views@{app.views}!send\_message@{send\_message}}
+\index{send\_message@{send\_message}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{send\_message()}{send\_message()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_afda9c2cf94cfbc8ff246ba8aacc9aa1a} 
+app.\+views.\+send\+\_\+message (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to send a message.
+
+This endpoint expects a JSON body with `text`, `author_id`, and `created_at`. 
+It validates the input and stores the message in the database.
+
+@return: JSON response with the `message_id` of the created message.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_ac5358bc7cc3a20e0d8867d42c2c55c1a}\index{app.views@{app.views}!send\_otp@{send\_otp}}
+\index{send\_otp@{send\_otp}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{send\_otp()}{send\_otp()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_ac5358bc7cc3a20e0d8867d42c2c55c1a} 
+app.\+views.\+send\+\_\+otp (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to send an OTP to the user's email.
+
+This endpoint expects a JSON body with the user's `email`. 
+It generates and sends an OTP to the provided email address.
+
+@return: JSON response indicating whether the OTP was sent successfully.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_ad656b58adbad6b81a8fe77f5baa01be4}\index{app.views@{app.views}!send\_otp\_email@{send\_otp\_email}}
+\index{send\_otp\_email@{send\_otp\_email}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{send\_otp\_email()}{send\_otp\_email()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_ad656b58adbad6b81a8fe77f5baa01be4} 
+app.\+views.\+send\+\_\+otp\+\_\+email (\begin{DoxyParamCaption}\item[{}]{to\+\_\+email}{, }\item[{}]{otp}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Sends an OTP to the specified email address using SendGrid API.
+
+@param to_email: The recipient's email address.
+@param otp: The OTP to be sent in the email.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_ae3e7aa7165ad8c5169fe5d621bea34a8}\index{app.views@{app.views}!signup@{signup}}
+\index{signup@{signup}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{signup()}{signup()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_ae3e7aa7165ad8c5169fe5d621bea34a8} 
+app.\+views.\+signup (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to sign up a new user.
+
+This endpoint expects a JSON body with `name`, `email`, `phone_number`, `password`, and `nsu_id`.
+It validates the input and checks for the existence of the email and NSU ID. If valid, it hashes
+the password and creates the user.
+
+@return: JSON response with success message or error.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a8ffb428c6387d294ee15227b73492a92}\index{app.views@{app.views}!uploaded\_file@{uploaded\_file}}
+\index{uploaded\_file@{uploaded\_file}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{uploaded\_file()}{uploaded\_file()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a8ffb428c6387d294ee15227b73492a92} 
+app.\+views.\+uploaded\+\_\+file (\begin{DoxyParamCaption}\item[{}]{filename}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to serve uploaded files.
+
+This endpoint returns the file from the upload directory.
+
+@param filename: The name of the file to retrieve.
+@return: The requested file.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1views_a0d986a8d0acfaea5573bc5872fc0ba43}\index{app.views@{app.views}!verify\_otp@{verify\_otp}}
+\index{verify\_otp@{verify\_otp}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{verify\_otp()}{verify\_otp()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a0d986a8d0acfaea5573bc5872fc0ba43} 
+app.\+views.\+verify\+\_\+otp (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Endpoint to verify the OTP entered by the user.
+
+This endpoint expects a JSON body with `email` and `otp`. 
+It checks whether the OTP is correct and has not expired.
+
+@return: JSON response indicating whether the OTP was successfully verified.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceapp_1_1views_a0ac2a860f5768536e463820f6d068aad}\index{app.views@{app.views}!ALLOWED\_EXTENSIONS@{ALLOWED\_EXTENSIONS}}
+\index{ALLOWED\_EXTENSIONS@{ALLOWED\_EXTENSIONS}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{ALLOWED\_EXTENSIONS}{ALLOWED\_EXTENSIONS}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a0ac2a860f5768536e463820f6d068aad} 
+dict app.\+views.\+ALLOWED\+\_\+\+EXTENSIONS = \{\textquotesingle{}png\textquotesingle{}, \textquotesingle{}jpg\textquotesingle{}, \textquotesingle{}jpeg\textquotesingle{}\}}
+
+\Hypertarget{namespaceapp_1_1views_a0fe5d51a1aaf6cbbbc05527fc127c11f}\index{app.views@{app.views}!main\_bp@{main\_bp}}
+\index{main\_bp@{main\_bp}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{main\_bp}{main\_bp}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a0fe5d51a1aaf6cbbbc05527fc127c11f} 
+app.\+views.\+main\+\_\+bp = Blueprint("{}main"{}, \+\_\+\+\_\+name\+\_\+\+\_\+)}
+
+\Hypertarget{namespaceapp_1_1views_a102113e9a88c80ecf096474313074e8f}\index{app.views@{app.views}!otp\_storage@{otp\_storage}}
+\index{otp\_storage@{otp\_storage}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{otp\_storage}{otp\_storage}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a102113e9a88c80ecf096474313074e8f} 
+dict app.\+views.\+otp\+\_\+storage = \{\}}
+
+\Hypertarget{namespaceapp_1_1views_a9b90fac8ec22b313bd9d85ebaa7b50d1}\index{app.views@{app.views}!sg@{sg}}
+\index{sg@{sg}!app.views@{app.views}}
+\doxysubsubsection{\texorpdfstring{sg}{sg}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1views_a9b90fac8ec22b313bd9d85ebaa7b50d1} 
+app.\+views.\+sg = sendgrid.\+Send\+Grid\+APIClient(api\+\_\+key=os.\+getenv("{}SENDGRID\+\_\+\+API\+\_\+\+KEY"{}))}
+

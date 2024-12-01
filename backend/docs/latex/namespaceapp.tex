@@ -1,0 +1,65 @@
+\doxysection{app Namespace Reference}
+\hypertarget{namespaceapp}{}\label{namespaceapp}\index{app@{app}}
+\doxysubsubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespaceapp_1_1models}{models}}
+\item 
+namespace \mbox{\hyperlink{namespaceapp_1_1utils}{utils}}
+\item 
+namespace \mbox{\hyperlink{namespaceapp_1_1views}{views}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceapp_a7bec7de509635f6cfa5b356d76e47974}{create\+\_\+app}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceapp_a04fe642f7ba75881d421080a9a6c19f6}{mongo}} = Py\+Mongo()
+\item 
+\mbox{\hyperlink{namespaceapp_a70cf2de9bbd3bf333f2d82b290411abf}{basedir}} = os.\+path.\+abspath(os.\+path.\+dirname(\+\_\+\+\_\+file\+\_\+\+\_\+))
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}__init__.py
+
+This module initializes the Flask application, configures the app settings, 
+and sets up integrations like MongoDB and CORS.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceapp_a7bec7de509635f6cfa5b356d76e47974}\index{app@{app}!create\_app@{create\_app}}
+\index{create\_app@{create\_app}!app@{app}}
+\doxysubsubsection{\texorpdfstring{create\_app()}{create\_app()}}
+{\footnotesize\ttfamily \label{namespaceapp_a7bec7de509635f6cfa5b356d76e47974} 
+app.\+create\+\_\+app (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Creates and configures the Flask application.
+
+The application is configured with:
+    - Flask-PyMongo for MongoDB integration.
+    - Flask-CORS for Cross-Origin Resource Sharing.
+    - Logging for debugging and monitoring.
+
+Returns:
+    Flask: The initialized Flask application instance.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceapp_a70cf2de9bbd3bf333f2d82b290411abf}\index{app@{app}!basedir@{basedir}}
+\index{basedir@{basedir}!app@{app}}
+\doxysubsubsection{\texorpdfstring{basedir}{basedir}}
+{\footnotesize\ttfamily \label{namespaceapp_a70cf2de9bbd3bf333f2d82b290411abf} 
+app.\+basedir = os.\+path.\+abspath(os.\+path.\+dirname(\+\_\+\+\_\+file\+\_\+\+\_\+))}
+
+\Hypertarget{namespaceapp_a04fe642f7ba75881d421080a9a6c19f6}\index{app@{app}!mongo@{mongo}}
+\index{mongo@{mongo}!app@{app}}
+\doxysubsubsection{\texorpdfstring{mongo}{mongo}}
+{\footnotesize\ttfamily \label{namespaceapp_a04fe642f7ba75881d421080a9a6c19f6} 
+app.\+mongo = Py\+Mongo()}
+

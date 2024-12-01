@@ -1,0 +1,70 @@
+\doxysection{app.\+models.\+User\+Model Class Reference}
+\hypertarget{classapp_1_1models_1_1_user_model}{}\label{classapp_1_1models_1_1_user_model}\index{app.models.UserModel@{app.models.UserModel}}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_user_model_a9d6641555f21bb0bb165c1c730b32381}{create\+\_\+user}} (data)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_user_model_a9f76665470eb6963aa007401bbd5c07c}{get\+\_\+user\+\_\+by\+\_\+email}} (email)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_user_model_a407e3b0d75c32282ec0c09bc03492304}{get\+\_\+user\+\_\+by\+\_\+nsu\+\_\+id}} (nsu\+\_\+id)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Handles database operations related to users.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classapp_1_1models_1_1_user_model_a9d6641555f21bb0bb165c1c730b32381}\index{app.models.UserModel@{app.models.UserModel}!create\_user@{create\_user}}
+\index{create\_user@{create\_user}!app.models.UserModel@{app.models.UserModel}}
+\doxysubsubsection{\texorpdfstring{create\_user()}{create\_user()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_user_model_a9d6641555f21bb0bb165c1c730b32381} 
+app.\+models.\+User\+Model.\+create\+\_\+user (\begin{DoxyParamCaption}\item[{}]{data}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Creates a new user in the database.
+
+Args:
+    data (dict): A dictionary containing user details. Required fields: 
+                 "name", "email", "phone_number", "password", "nsu_id".
+
+Returns:
+    str: The unique ID of the created user.
+
+Raises:
+    ValueError: If any required field is missing.
+\end{DoxyVerb}
+ \Hypertarget{classapp_1_1models_1_1_user_model_a9f76665470eb6963aa007401bbd5c07c}\index{app.models.UserModel@{app.models.UserModel}!get\_user\_by\_email@{get\_user\_by\_email}}
+\index{get\_user\_by\_email@{get\_user\_by\_email}!app.models.UserModel@{app.models.UserModel}}
+\doxysubsubsection{\texorpdfstring{get\_user\_by\_email()}{get\_user\_by\_email()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_user_model_a9f76665470eb6963aa007401bbd5c07c} 
+app.\+models.\+User\+Model.\+get\+\_\+user\+\_\+by\+\_\+email (\begin{DoxyParamCaption}\item[{}]{email}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Retrieves a user by their email address.
+
+Args:
+    email (str): The email of the user to find.
+
+Returns:
+    dict: The user's details if found, otherwise None.
+\end{DoxyVerb}
+ \Hypertarget{classapp_1_1models_1_1_user_model_a407e3b0d75c32282ec0c09bc03492304}\index{app.models.UserModel@{app.models.UserModel}!get\_user\_by\_nsu\_id@{get\_user\_by\_nsu\_id}}
+\index{get\_user\_by\_nsu\_id@{get\_user\_by\_nsu\_id}!app.models.UserModel@{app.models.UserModel}}
+\doxysubsubsection{\texorpdfstring{get\_user\_by\_nsu\_id()}{get\_user\_by\_nsu\_id()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_user_model_a407e3b0d75c32282ec0c09bc03492304} 
+app.\+models.\+User\+Model.\+get\+\_\+user\+\_\+by\+\_\+nsu\+\_\+id (\begin{DoxyParamCaption}\item[{}]{nsu\+\_\+id}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Retrieves a user by their NSU ID.
+
+Args:
+    nsu_id (str): The NSU ID of the user to find.
+
+Returns:
+    dict: The user's details if found, otherwise None.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+app/\mbox{\hyperlink{models_8py}{models.\+py}}\end{DoxyCompactItemize}

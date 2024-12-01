@@ -9,10 +9,25 @@ main_bp = Blueprint("main", __name__)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
+    """
+    Checks if the file extension is allowed.
+    
+    @param filename: The name of the file to check.
+    @return: True if the file extension is allowed, otherwise False.
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @main_bp.route("/users", methods=["POST"])
 def create_user():
+    """
+    Endpoint to create a new user.
+    
+    This endpoint expects a JSON body with `username`, `email`, and `password`. 
+    It checks if the user already exists by email. If not, it hashes the password 
+    and creates the user in the database.
+
+    @return: JSON response with success message or error.
+    """
     data = request.get_json()
     if not data or "username" not in data or "email" not in data or "password" not in data:
         return jsonify({"error": "Invalid data"}), 400
@@ -27,6 +42,14 @@ def create_user():
 
 @main_bp.route("/login", methods=["POST"])
 def login():
+    """
+    Endpoint for user login.
+
+    This endpoint expects a JSON body with `email` and `password`. It checks if the user exists 
+    and if the provided password matches. If successful, it returns a success message.
+
+    @return: JSON response with login success message or error.
+    """
     data = request.get_json()
     user = UserModel.get_user_by_email(data["email"])
     if not user or not check_password(data["password"], user["password"]):
@@ -36,6 +59,15 @@ def login():
 
 @main_bp.route("/signup", methods=["POST"])
 def signup():
+    """
+    Endpoint to sign up a new user.
+
+    This endpoint expects a JSON body with `name`, `email`, `phone_number`, `password`, and `nsu_id`.
+    It validates the input and checks for the existence of the email and NSU ID. If valid, it hashes
+    the password and creates the user.
+
+    @return: JSON response with success message or error.
+    """
     data = request.get_json()
 
     # Validate input
@@ -62,10 +94,26 @@ def signup():
 
 @main_bp.route('/uploads/<filename>', endpoint='uploaded_file')
 def uploaded_file(filename):
+    """
+    Endpoint to serve uploaded files.
+
+    This endpoint returns the file from the upload directory.
+
+    @param filename: The name of the file to retrieve.
+    @return: The requested file.
+    """
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
+    """
+    Endpoint to report a lost item.
+
+    This endpoint accepts form data to report a lost item. It handles image uploads, 
+    validates required fields, and saves the lost item in the database.
+
+    @return: JSON response with success message or error.
+    """
     image_path = None
 
     # Handling image upload
@@ -108,6 +156,14 @@ def report_lost_item():
 
 @main_bp.route('/lost-items', methods=['GET'])
 def get_lost_items():
+    """
+    Endpoint to retrieve lost items.
+
+    This endpoint returns a paginated list of lost items. It includes optional `limit` and `skip` 
+    query parameters for pagination. If an item has an image, the image URL is also included.
+
+    @return: JSON response with list of lost items.
+    """
     limit = int(request.args.get("limit", 10))
     skip = int(request.args.get("skip", 0))
 
@@ -123,6 +179,14 @@ def get_lost_items():
 
 @main_bp.route('/found-items', methods=['POST'])
 def report_found_item():
+    """
+    Endpoint to report a found item.
+
+    This endpoint accepts a JSON body with the description, location, and image path of the found item.
+    It saves the found item in the database.
+
+    @return: JSON response with success message or error.
+    """
     data = request.get_json()
     
     # Validate required fields
@@ -140,6 +204,14 @@ def report_found_item():
 
 @main_bp.route('/lost-items/<item_id>/found', methods=['POST'])
 def mark_item_as_found(item_id):
+    """
+    Endpoint to mark a lost item as found.
+
+    This endpoint moves the item from the `lost_items` collection to the `found_items` collection.
+
+    @param item_id: The ID of the lost item to mark as found.
+    @return: JSON response with success message or error.
+    """
     # Mark the item as found and move it to the found_items collection
     result = LostItemModel.mark_item_as_found(item_id)
     if not result:
@@ -149,6 +221,14 @@ def mark_item_as_found(item_id):
 
 @main_bp.route('/found-items', methods=['GET'])
 def get_found_items():
+    """
+    Endpoint to retrieve found items.
+
+    This endpoint returns a paginated list of found items. It includes optional `limit` and `skip` 
+    query parameters for pagination. If an item has an image, the image URL is also included.
+
+    @return: JSON response with list of found items.
+    """
     limit = int(request.args.get("limit", 100))
     skip = int(request.args.get("skip", 0))
     
@@ -164,6 +244,14 @@ def get_found_items():
 
 @main_bp.route("/activity-feed", methods=["GET"])
 def activity_feed():
+    """
+    Endpoint to retrieve a feed of recent lost items.
+
+    This endpoint returns a paginated list of recent lost items. It includes an optional `limit` 
+    query parameter for pagination.
+
+    @return: JSON response with activity feed.
+    """
     limit = int(request.args.get("limit", 10))
     feed = LostItemModel.get_recent_feed(limit=limit)
     return jsonify(feed), 200
@@ -181,8 +269,53 @@ from dotenv import load_dotenv
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import os
 load_dotenv()
+
+# SendGrid API Client
+sg = sendgrid.SendGridAPIClient(api_key=os.getenv("SENDGRID_API_KEY"))  # Ensure the API key is set
+
+# Temporary storage for OTP (Use a better storage like Redis or a database in production)
+otp_storage = {}
+
+# Generate OTP (6-digit)
+def generate_otp():
+    """
+    Generates a 6-digit One-Time Password (OTP).
+    
+    @return: A randomly generated 6-digit OTP.
+    """
+    return random.randint(100000, 999999)
+
+# Send OTP to user's email
+def send_otp_email(to_email, otp):
+    """
+    Sends an OTP to the specified email address using SendGrid API.
+
+    @param to_email: The recipient's email address.
+    @param otp: The OTP to be sent in the email.
+    """
+    from_email = Email("smartfreelancehub@gmail.com")  # Your email
+    to_email = To(to_email)  # Recipient's email
+    subject = "Your OTP Code"
+    content = Content("text/plain", f"Your OTP code is: {otp}")
+
+    mail = Mail(from_email, to_email, subject, content)
+
+    try:
+        response = sg.send(mail)
+        print(f"Email sent with status code {response.status_code}")
+    except Exception as e:
+        print(str(e))
+
 @main_bp.route('/send_message', methods=['POST'])
 def send_message():
+    """
+    Endpoint to send a message.
+    
+    This endpoint expects a JSON body with `text`, `author_id`, and `created_at`. 
+    It validates the input and stores the message in the database.
+
+    @return: JSON response with the `message_id` of the created message.
+    """
     data = request.json
     if not data.get("text") or not data.get("author_id") or not data.get("created_at"):
         return jsonify({"error": "Missing required fields"}), 400
@@ -192,6 +325,14 @@ def send_message():
 
 @main_bp.route('/get_messages', methods=['POST'])
 def get_messages():
+    """
+    Endpoint to retrieve messages between two users.
+
+    This endpoint expects a JSON body with `author_id` and `receiver_id`. 
+    It returns a paginated list of messages with optional `limit` and `skip` query parameters.
+
+    @return: JSON response with the list of messages.
+    """
     data = request.json
     author_id = data.get("author_id")
     receiver_id = data.get("receiver_id")
@@ -206,35 +347,16 @@ def get_messages():
 
     return jsonify(messages), 200
 
-
-# SendGrid API Client
-sg = sendgrid.SendGridAPIClient(api_key=os.getenv("SENDGRID_API_KEY"))  # Ensure the API key is set
-
-# Temporary storage for OTP (Use a better storage like Redis or a database in production)
-otp_storage = {}
-
-# Generate OTP (6-digit)
-def generate_otp():
-    return random.randint(100000, 999999)
-
-# Send OTP to user's email
-def send_otp_email(to_email, otp):
-    from_email = Email("smartfreelancehub@gmail.com")  # Your email
-    to_email = To(to_email)  # Recipient's email
-    subject = "Your OTP Code"
-    content = Content("text/plain", f"Your OTP code is: {otp}")
-
-    mail = Mail(from_email, to_email, subject, content)
-
-    try:
-        response = sg.send(mail)
-        print(f"Email sent with status code {response.status_code}")
-    except Exception as e:
-        print(str(e))
-
-# Route to send OTP to email
 @main_bp.route('/send_otp', methods=['POST'])
 def send_otp():
+    """
+    Endpoint to send an OTP to the user's email.
+
+    This endpoint expects a JSON body with the user's `email`. 
+    It generates and sends an OTP to the provided email address.
+
+    @return: JSON response indicating whether the OTP was sent successfully.
+    """
     data = request.json
     email = data.get('email')
 
@@ -251,10 +373,16 @@ def send_otp():
 
     return jsonify({"message": "OTP sent successfully to email"}), 200
 
-
-# Route to verify OTP
 @main_bp.route('/verify_otp', methods=['POST'])
 def verify_otp():
+    """
+    Endpoint to verify the OTP entered by the user.
+
+    This endpoint expects a JSON body with `email` and `otp`. 
+    It checks whether the OTP is correct and has not expired.
+
+    @return: JSON response indicating whether the OTP was successfully verified.
+    """
     data = request.json
     email = data.get('email')
     otp = data.get('otp')
@@ -284,6 +412,14 @@ def verify_otp():
 from . import mongo
 @main_bp.route('/get_chats', methods=['POST'])
 def get_chats():
+    """
+    Endpoint to retrieve all chats for a user.
+
+    This endpoint expects a JSON body with `user_id`, representing the current user. 
+    It returns a list of chats where the user is either the author or receiver of messages.
+
+    @return: JSON response with the list of chats.
+    """
     data = request.json
     user_id = data.get("user_id")  # Current user ID/email
 
@@ -310,9 +446,16 @@ def get_chats():
 
     return jsonify(chat_list), 200
 
-
 @main_bp.route('/search-lost-items', methods=['GET'])
 def search_lost_items():
+    """
+    Endpoint to search for lost items.
+
+    This endpoint performs a text search on the `description` field of lost items and returns 
+    the matching items. It accepts a `query` parameter.
+
+    @return: JSON response with the list of lost items that match the search query.
+    """
     query = request.args.get('query', '')
     if not query:
         return jsonify({"error": "No search query provided"}), 400
@@ -334,8 +477,13 @@ def search_lost_items():
 
     return jsonify(result), 200
 
-# Function to send email to users
 def send_lost_item_email(to_email, lost_items_count):
+    """
+    Sends a notification email about the number of lost items.
+
+    @param to_email: The recipient's email address.
+    @param lost_items_count: The number of lost items to report.
+    """
     from_email = Email("smartfreelancehub@gmail.com")  # Your email
     to_email = To(to_email)  # Recipient's email
     subject = "Lost Items Notification"
@@ -410,9 +558,14 @@ def send_lost_item_email(to_email, lost_items_count):
     except Exception as e:
         print(f"Error sending email: {e}")
 
-# Example route to send lost items email
 @main_bp.route('/send_lost_items_email', methods=['POST'])
 def send_lost_items_email():
+    """
+    Endpoint to send a notification email about lost items to all users.
+
+    This endpoint fetches the count of lost items and sends an email to all registered users
+    notifying them of the number of lost items.
+    """
     # Fetch lost items count from database using LostItemModel
     lost_items_count = mongo.db.lost_items.count_documents({"is_found": False})  # Count lost items
 
@@ -433,10 +586,19 @@ def send_lost_items_email():
     return jsonify({"message": f"Lost items email sent to {count} users"}), 200
 
 
+
 from bson import ObjectId
-# Route to approve a lost item
 @main_bp.route('/lost-items/<item_id>/approve', methods=['POST'])
 def approve_item(item_id):
+    """
+    Endpoint to approve a lost item.
+
+    This endpoint accepts an `item_id` and updates the item to mark it as approved.
+
+    @param item_id: The ID of the lost item to approve.
+
+    @return: JSON response indicating the result of the approval operation.
+    """
     try:
         # Find the lost item by ID
         lost_item = mongo.db.lost_items.find_one({"_id": ObjectId(item_id)})
@@ -462,6 +624,13 @@ def approve_item(item_id):
     
 @main_bp.route('/lost-items-admin', methods=['GET'])
 def get_lost_items_admin():
+    """
+    Endpoint to retrieve a list of lost items for the admin.
+
+    This endpoint returns a paginated list of lost items, with optional `limit` and `skip` query parameters.
+
+    @return: JSON response with the list of lost items for the admin.
+    """
     limit = int(request.args.get("limit", 10))
     skip = int(request.args.get("skip", 0))
 

@@ -1,0 +1,107 @@
+\doxysection{app.\+utils Namespace Reference}
+\hypertarget{namespaceapp_1_1utils}{}\label{namespaceapp_1_1utils}\index{app.utils@{app.utils}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceapp_1_1utils_a4b5ffc23ef5a4dc471973dfb9f312c33}{validate\+\_\+input}} (data, required\+\_\+fields)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1utils_a808739adbe5d8510947519f1a8cb9d9f}{hash\+\_\+password}} (password)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1utils_a4b66e83fc3dc784f5ac23d03b695a5a7}{check\+\_\+password}} (password, hashed\+\_\+password)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1utils_a60ce83b10d08961b1bc7b347a20dc104}{is\+\_\+valid\+\_\+phone\+\_\+number}} (phone\+\_\+number)
+\item 
+\mbox{\hyperlink{namespaceapp_1_1utils_abecebd2492057684c7e5e68f80b3ef0a}{is\+\_\+valid\+\_\+nsu\+\_\+id}} (nsu\+\_\+id)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}utils.py
+
+This module provides utility functions for password hashing, validation, and 
+input validation. It includes methods to handle common operations such as 
+validating user input, hashing passwords, and validating phone numbers or NSU IDs.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceapp_1_1utils_a4b66e83fc3dc784f5ac23d03b695a5a7}\index{app.utils@{app.utils}!check\_password@{check\_password}}
+\index{check\_password@{check\_password}!app.utils@{app.utils}}
+\doxysubsubsection{\texorpdfstring{check\_password()}{check\_password()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1utils_a4b66e83fc3dc784f5ac23d03b695a5a7} 
+app.\+utils.\+check\+\_\+password (\begin{DoxyParamCaption}\item[{}]{password}{, }\item[{}]{hashed\+\_\+password}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Verifies if a plaintext password matches a given hashed password.
+
+Args:
+    password (str): The plaintext password.
+    hashed_password (str): The hashed password to compare against.
+
+Returns:
+    bool: True if the passwords match, False otherwise.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1utils_a808739adbe5d8510947519f1a8cb9d9f}\index{app.utils@{app.utils}!hash\_password@{hash\_password}}
+\index{hash\_password@{hash\_password}!app.utils@{app.utils}}
+\doxysubsubsection{\texorpdfstring{hash\_password()}{hash\_password()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1utils_a808739adbe5d8510947519f1a8cb9d9f} 
+app.\+utils.\+hash\+\_\+password (\begin{DoxyParamCaption}\item[{}]{password}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Hashes a plaintext password using bcrypt.
+
+Args:
+    password (str): The plaintext password to hash.
+
+Returns:
+    str: The hashed password as a string.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1utils_abecebd2492057684c7e5e68f80b3ef0a}\index{app.utils@{app.utils}!is\_valid\_nsu\_id@{is\_valid\_nsu\_id}}
+\index{is\_valid\_nsu\_id@{is\_valid\_nsu\_id}!app.utils@{app.utils}}
+\doxysubsubsection{\texorpdfstring{is\_valid\_nsu\_id()}{is\_valid\_nsu\_id()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1utils_abecebd2492057684c7e5e68f80b3ef0a} 
+app.\+utils.\+is\+\_\+valid\+\_\+nsu\+\_\+id (\begin{DoxyParamCaption}\item[{}]{nsu\+\_\+id}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Validates an NSU (North South University) student ID.
+
+Args:
+    nsu_id (str): The NSU ID to validate.
+
+Returns:
+    bool: True if the NSU ID matches the format, False otherwise.
+
+The format ensures:
+    - The ID is a 7-digit number.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1utils_a60ce83b10d08961b1bc7b347a20dc104}\index{app.utils@{app.utils}!is\_valid\_phone\_number@{is\_valid\_phone\_number}}
+\index{is\_valid\_phone\_number@{is\_valid\_phone\_number}!app.utils@{app.utils}}
+\doxysubsubsection{\texorpdfstring{is\_valid\_phone\_number()}{is\_valid\_phone\_number()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1utils_a60ce83b10d08961b1bc7b347a20dc104} 
+app.\+utils.\+is\+\_\+valid\+\_\+phone\+\_\+number (\begin{DoxyParamCaption}\item[{}]{phone\+\_\+number}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Validates a Bangladeshi phone number format.
+
+Args:
+    phone_number (str): The phone number to validate.
+
+Returns:
+    bool: True if the phone number matches the format, False otherwise.
+
+The format ensures:
+    - The number starts with '01'.
+    - It is followed by 9 digits.
+\end{DoxyVerb}
+ \Hypertarget{namespaceapp_1_1utils_a4b5ffc23ef5a4dc471973dfb9f312c33}\index{app.utils@{app.utils}!validate\_input@{validate\_input}}
+\index{validate\_input@{validate\_input}!app.utils@{app.utils}}
+\doxysubsubsection{\texorpdfstring{validate\_input()}{validate\_input()}}
+{\footnotesize\ttfamily \label{namespaceapp_1_1utils_a4b5ffc23ef5a4dc471973dfb9f312c33} 
+app.\+utils.\+validate\+\_\+input (\begin{DoxyParamCaption}\item[{}]{data}{, }\item[{}]{required\+\_\+fields}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Validates that all required fields are present and non-empty in the input data.
+
+Args:
+    data (dict): The input data to validate.
+    required_fields (list): A list of required field names.
+
+Returns:
+    bool: True if all required fields are present and non-empty, False otherwise.
+\end{DoxyVerb}
+ 

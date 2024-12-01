@@ -1,0 +1,78 @@
+\doxysection{app.\+models.\+Lost\+Item\+Model Class Reference}
+\hypertarget{classapp_1_1models_1_1_lost_item_model}{}\label{classapp_1_1models_1_1_lost_item_model}\index{app.models.LostItemModel@{app.models.LostItemModel}}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_lost_item_model_af3c8a5101b791796b6d63954e4d6d767}{report\+\_\+lost\+\_\+item}} (description, location, image\+\_\+path, reported\+\_\+by)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_lost_item_model_abb3b3f8f49977a063322c022adba32f6}{mark\+\_\+item\+\_\+as\+\_\+found}} (item\+\_\+id)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_lost_item_model_a1722ed6b7bf5d2a3786fdd457dae6c5d}{get\+\_\+lost\+\_\+items}} (limit=10, skip=0)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_lost_item_model_aca903c0fea38dbf32fad9c93ea48d3e5}{get\+\_\+lost\+\_\+items\+\_\+admin}} (limit=10, skip=0)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Handles database operations related to lost items.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classapp_1_1models_1_1_lost_item_model_a1722ed6b7bf5d2a3786fdd457dae6c5d}\index{app.models.LostItemModel@{app.models.LostItemModel}!get\_lost\_items@{get\_lost\_items}}
+\index{get\_lost\_items@{get\_lost\_items}!app.models.LostItemModel@{app.models.LostItemModel}}
+\doxysubsubsection{\texorpdfstring{get\_lost\_items()}{get\_lost\_items()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_lost_item_model_a1722ed6b7bf5d2a3786fdd457dae6c5d} 
+app.\+models.\+Lost\+Item\+Model.\+get\+\_\+lost\+\_\+items (\begin{DoxyParamCaption}\item[{}]{limit}{ = {\ttfamily 10}, }\item[{}]{skip}{ = {\ttfamily 0}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Retrieves a list of lost items.
+
+Args:
+    limit (int): The maximum number of items to retrieve.
+    skip (int): The number of items to skip.
+
+Returns:
+    list: A list of lost items with their details.
+\end{DoxyVerb}
+ \Hypertarget{classapp_1_1models_1_1_lost_item_model_aca903c0fea38dbf32fad9c93ea48d3e5}\index{app.models.LostItemModel@{app.models.LostItemModel}!get\_lost\_items\_admin@{get\_lost\_items\_admin}}
+\index{get\_lost\_items\_admin@{get\_lost\_items\_admin}!app.models.LostItemModel@{app.models.LostItemModel}}
+\doxysubsubsection{\texorpdfstring{get\_lost\_items\_admin()}{get\_lost\_items\_admin()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_lost_item_model_aca903c0fea38dbf32fad9c93ea48d3e5} 
+app.\+models.\+Lost\+Item\+Model.\+get\+\_\+lost\+\_\+items\+\_\+admin (\begin{DoxyParamCaption}\item[{}]{limit}{ = {\ttfamily 10}, }\item[{}]{skip}{ = {\ttfamily 0}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\Hypertarget{classapp_1_1models_1_1_lost_item_model_abb3b3f8f49977a063322c022adba32f6}\index{app.models.LostItemModel@{app.models.LostItemModel}!mark\_item\_as\_found@{mark\_item\_as\_found}}
+\index{mark\_item\_as\_found@{mark\_item\_as\_found}!app.models.LostItemModel@{app.models.LostItemModel}}
+\doxysubsubsection{\texorpdfstring{mark\_item\_as\_found()}{mark\_item\_as\_found()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_lost_item_model_abb3b3f8f49977a063322c022adba32f6} 
+app.\+models.\+Lost\+Item\+Model.\+mark\+\_\+item\+\_\+as\+\_\+found (\begin{DoxyParamCaption}\item[{}]{item\+\_\+id}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Marks a lost item as found and moves it to the found items collection.
+
+Args:
+    item_id (str): The unique ID of the lost item.
+
+Returns:
+    str: The ID of the marked item if successful, otherwise None.
+\end{DoxyVerb}
+ \Hypertarget{classapp_1_1models_1_1_lost_item_model_af3c8a5101b791796b6d63954e4d6d767}\index{app.models.LostItemModel@{app.models.LostItemModel}!report\_lost\_item@{report\_lost\_item}}
+\index{report\_lost\_item@{report\_lost\_item}!app.models.LostItemModel@{app.models.LostItemModel}}
+\doxysubsubsection{\texorpdfstring{report\_lost\_item()}{report\_lost\_item()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_lost_item_model_af3c8a5101b791796b6d63954e4d6d767} 
+app.\+models.\+Lost\+Item\+Model.\+report\+\_\+lost\+\_\+item (\begin{DoxyParamCaption}\item[{}]{description}{, }\item[{}]{location}{, }\item[{}]{image\+\_\+path}{, }\item[{}]{reported\+\_\+by}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Reports a lost item.
+
+Args:
+    description (str): A description of the lost item.
+    location (str): The location where the item was lost.
+    image_path (str): Path to the image of the lost item.
+    reported_by (str): The user who reported the lost item.
+
+Returns:
+    str: The unique ID of the reported lost item.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+app/\mbox{\hyperlink{models_8py}{models.\+py}}\end{DoxyCompactItemize}

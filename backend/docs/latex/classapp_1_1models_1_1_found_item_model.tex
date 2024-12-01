@@ -1,0 +1,53 @@
+\doxysection{app.\+models.\+Found\+Item\+Model Class Reference}
+\hypertarget{classapp_1_1models_1_1_found_item_model}{}\label{classapp_1_1models_1_1_found_item_model}\index{app.models.FoundItemModel@{app.models.FoundItemModel}}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_found_item_model_a2b3718f4a7605b29584d87cf2eb71464}{report\+\_\+found\+\_\+item}} (description, location, image\+\_\+path)
+\item 
+\mbox{\hyperlink{classapp_1_1models_1_1_found_item_model_aa5a68671283e74ab5cbc010573e745e7}{get\+\_\+found\+\_\+items}} (limit=10, skip=0)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Handles database operations related to found items.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classapp_1_1models_1_1_found_item_model_aa5a68671283e74ab5cbc010573e745e7}\index{app.models.FoundItemModel@{app.models.FoundItemModel}!get\_found\_items@{get\_found\_items}}
+\index{get\_found\_items@{get\_found\_items}!app.models.FoundItemModel@{app.models.FoundItemModel}}
+\doxysubsubsection{\texorpdfstring{get\_found\_items()}{get\_found\_items()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_found_item_model_aa5a68671283e74ab5cbc010573e745e7} 
+app.\+models.\+Found\+Item\+Model.\+get\+\_\+found\+\_\+items (\begin{DoxyParamCaption}\item[{}]{limit}{ = {\ttfamily 10}, }\item[{}]{skip}{ = {\ttfamily 0}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Retrieves a list of found items.
+
+Args:
+    limit (int): The maximum number of items to retrieve.
+    skip (int): The number of items to skip.
+
+Returns:
+    list: A list of found items with their details.
+\end{DoxyVerb}
+ \Hypertarget{classapp_1_1models_1_1_found_item_model_a2b3718f4a7605b29584d87cf2eb71464}\index{app.models.FoundItemModel@{app.models.FoundItemModel}!report\_found\_item@{report\_found\_item}}
+\index{report\_found\_item@{report\_found\_item}!app.models.FoundItemModel@{app.models.FoundItemModel}}
+\doxysubsubsection{\texorpdfstring{report\_found\_item()}{report\_found\_item()}}
+{\footnotesize\ttfamily \label{classapp_1_1models_1_1_found_item_model_a2b3718f4a7605b29584d87cf2eb71464} 
+app.\+models.\+Found\+Item\+Model.\+report\+\_\+found\+\_\+item (\begin{DoxyParamCaption}\item[{}]{description}{, }\item[{}]{location}{, }\item[{}]{image\+\_\+path}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\begin{DoxyVerb}Reports a found item.
+
+Args:
+    description (str): A description of the found item.
+    location (str): The location where the item was found.
+    image_path (str): Path to the image of the found item.
+
+Returns:
+    str: The unique ID of the reported item.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+app/\mbox{\hyperlink{models_8py}{models.\+py}}\end{DoxyCompactItemize}
