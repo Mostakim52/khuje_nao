@@ -72,9 +72,15 @@
     </section>
     
 <section class="desc markdown">
-  <p>Function to update the <code>is_found</code> status of an item
-<code>itemId</code> - The ID of the item in the MongoDB database
-Returns a boolean indicating success or failure</p>
+  <p>Updates the <code>is_found</code> status of a lost item in the database.</p>
+<p>This function sends a POST request to the backend to mark an item as found.
+It requires the item ID to identify the item in the database.</p>
+<p><code>itemId</code> - The ID of the item in the MongoDB database that needs its status updated.</p>
+<p>Returns a <code>Future&lt;bool&gt;</code>:</p>
+<ul>
+<li><code>true</code> if the status update was successful (HTTP status 200).</li>
+<li><code>false</code> if the status update failed or an error occurred.</li>
+</ul>
 </section>
 
 
@@ -94,7 +100,7 @@ Returns a boolean indicating success or failure</p>
         body: jsonEncode({}),  &#47;&#47; Empty body
     );
 
-  &#47;&#47; Check if the update was successful
+  &#47;&#47; Checks if the update was successful
     if (response.statusCode == 200) {
         print(&quot;Item marked as found.&quot;);
         return true; &#47;&#47; Success

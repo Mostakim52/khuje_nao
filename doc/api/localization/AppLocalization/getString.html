@@ -72,16 +72,26 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Method to get the string for the given key and language code
+Returns the localized string for the given <code>key</code> and <code>language_code</code>.</p>
+<p>If the <code>key</code> is not found in the provided <code>language_code</code>, the method
+will return the string from the default language ('en'). If the <code>key</code>
+does not exist in the default language, the method will return the <code>key</code> itself.</p>
+<p><code>language_code</code> The language code (e.g., 'en', 'bd').
+<code>key</code> The key representing the string to be retrieved.</p>
+<p>Returns the localized string for the <code>key</code> in the specified language.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static String getString(String language_code, String key) {
-    return localizedValues[language_code]?[key]
-        ?? localizedValues[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
-        ?? key;
-    }</code></pre>
+      return localizedValues[language_code]?[key]
+          ?? localizedValues[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
+          ?? key;
+      }</code></pre>
 </section>
 
 

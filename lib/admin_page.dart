@@ -4,15 +4,24 @@ import 'dart:convert';
 
 import 'package:khuje_nao/api_service.dart';
 
+/// The `AdminPage` widget provides an interface for the admin to view and approve lost items.
+/// It fetches a list of lost items from the backend and displays them with options to approve or refresh the list.
 class AdminPage extends StatefulWidget {
   @override
   _AdminPageState createState() => _AdminPageState();
 }
 
 class _AdminPageState extends State<AdminPage> {
+  /// A list of lost items fetched from the backend server.
   List<dynamic> _lostItems = [];
+
+  /// A boolean flag to indicate if the lost items are loading.
   bool _isLoading = true;
+
+  /// The base URL of the backend server.
   final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
+
+  /// An instance of the `ApiService` for making API calls.
   final ApiService apiService = ApiService();
 
   @override
@@ -21,6 +30,10 @@ class _AdminPageState extends State<AdminPage> {
     _fetchLostItems();
   }
 
+  /// Fetches the lost items from the backend and updates the state.
+  ///
+  /// This method sends a GET request to the backend and updates the list of lost items
+  /// once the data is successfully fetched.
   Future<void> _fetchLostItems() async {
     final url = '$baseUrl/lost-items-admin'; // Replace with your server URL
     try {
@@ -38,6 +51,10 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  /// Approves a specific lost item by sending a POST request to the backend.
+  ///
+  /// This method takes the item ID, sends a POST request to approve the item, and refreshes
+  /// the list of items once the approval is successful.
   Future<void> _approveItem(String itemId) async {
     final url = '$baseUrl/lost-items/$itemId/approve'; // Replace with your server URL
     try {
@@ -53,12 +70,18 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  /// Displays an error message in a snackbar.
+  ///
+  /// This method is used to show error messages to the user via a snackbar.
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message, style: TextStyle(color: Colors.red))),
     );
   }
 
+  /// Displays a success message in a snackbar.
+  ///
+  /// This method is used to show success messages to the user via a snackbar.
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),

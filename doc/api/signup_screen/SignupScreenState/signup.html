@@ -91,7 +91,10 @@ to the backend. Depending on the response, it shows appropriate messages.</p>
       case -5: showResponseDialog(AppLocalization.getString(language, &quot;invalid_phone&quot;));
       case -6: showResponseDialog(AppLocalization.getString(language, &quot;signup_fail&quot;));
       case 0: showResponseDialog(&quot;Sign Up Successful&quot;);
-      Navigator.pop(context); &#47;&#47; Go back after successful sign-up
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) =&gt; LoginScreen()),
+      );
     }
   }
 }</code></pre>

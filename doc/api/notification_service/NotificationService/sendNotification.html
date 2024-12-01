@@ -65,8 +65,8 @@
 
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">sendNotification</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="sendNotification-param-message"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">message</span>, </span></li>
-<li><span class="parameter" id="sendNotification-param-button1Text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">button1Text</span>, </span></li>
-<li><span class="parameter" id="sendNotification-param-button2Text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">button2Text</span></span></li>
+<li><span class="parameter" id="sendNotification-param-button_1_Text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">button_1_Text</span>, </span></li>
+<li><span class="parameter" id="sendNotification-param-button_2_Text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">button_2_Text</span></span></li>
 </ol>)
 
       
@@ -76,12 +76,12 @@
 <section class="desc markdown">
   <p>Sends a notification with two action buttons.</p>
 <p><code>message</code> is the body of the notification.
-<code>button1Text</code> and <code>button2Text</code> are the labels for the action buttons.</p>
+<code>button_1_Text</code> and <code>button_2_Text</code> are the labels for the action buttons.</p>
 <p>This method creates and sends a notification with the following:</p>
 <ul>
 <li>A notification title of "Notification".</li>
 <li>A body text defined by the <code>message</code> parameter.</li>
-<li>Two buttons, with labels provided by the <code>button1Text</code> and <code>button2Text</code> parameters.</li>
+<li>Two buttons, with labels provided by the <code>button_1_Text</code> and <code>button_2_Text</code> parameters.</li>
 </ul>
 <p>\note This method is used to send custom notifications with interactive action buttons.</p>
 </section>
@@ -90,7 +90,7 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static Future&lt;void&gt; sendNotification(String message, String button1Text, String button2Text) async {
+  <pre class="language-dart"><code class="language-dart">static Future&lt;void&gt; sendNotification(String message, String button_1_Text, String button_2_Text) async {
   await AwesomeNotifications().createNotification(
     content: NotificationContent(
       id: 10, &#47;&#47;&#47;&lt; \brief Unique identifier for the notification.
@@ -102,11 +102,11 @@
     actionButtons: [
       NotificationActionButton(
         key: &#39;BUTTON1&#39;, &#47;&#47;&#47;&lt; \brief Unique key for the first action button.
-        label: button1Text, &#47;&#47;&#47;&lt; \brief Label text displayed on the first button.
+        label: button_1_Text, &#47;&#47;&#47;&lt; \brief Label text displayed on the first button.
       ),
       NotificationActionButton(
         key: &#39;BUTTON2&#39;, &#47;&#47;&#47;&lt; \brief Unique key for the second action button.
-        label: button2Text, &#47;&#47;&#47;&lt; \brief Label text displayed on the second button.
+        label: button_2_Text, &#47;&#47;&#47;&lt; \brief Label text displayed on the second button.
       ),
     ],
   );
