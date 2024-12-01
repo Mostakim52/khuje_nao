@@ -19,27 +19,27 @@ class ReportLostItemScreen extends StatefulWidget {
   const ReportLostItemScreen({Key? key}) : super(key: key);
 
   @override
-  _ReportLostItemScreenState createState() => _ReportLostItemScreenState();
+  ReportLostItemScreenState createState() => ReportLostItemScreenState();
 }
 
-class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
+class ReportLostItemScreenState extends State<ReportLostItemScreen> {
   /// Controller for the description text field.
-  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController description_controller = TextEditingController();
 
   /// Controller for the location text field.
-  final TextEditingController locationController = TextEditingController();
+  final TextEditingController location_controller = TextEditingController();
 
   /// Holds the selected image file of the lost item.
-  File? _image;
+  File? image;
 
   /// An instance of [ImagePicker] to pick images from the camera or gallery.
-  final ImagePicker _picker = ImagePicker();
+  final ImagePicker picker = ImagePicker();
 
   /// An instance of [FlutterSecureStorage] to securely store user preferences.
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
 
   /// The language code for localization (default is 'en').
-  String _language = 'en';
+  String language = 'en';
 
   /// Picks an image from the specified [source] (camera or gallery).
   ///
@@ -49,16 +49,16 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   /// [source] is the source from which the image is picked. This can be:
   /// - [ImageSource.camera]: to pick an image using the camera.
   /// - [ImageSource.gallery]: to pick an image from the gallery.
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> pickImage(ImageSource source) async {
     try {
-      final pickedFile = await _picker.pickImage(source: source);
+      final pickedFile = await picker.pickImage(source: source);
       if (pickedFile != null) {
         setState(() {
-          _image = File(pickedFile.path);
+          image = File(pickedFile.path);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalization.getString(_language, 'no_img'))),
+          SnackBar(content: Text(AppLocalization.getString(language, 'no_img'))),
         );
       }
     } catch (e) {
@@ -71,16 +71,16 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   @override
   void initState() {
     super.initState();
-    _loadLanguage();
+    loadLanguage();
   }
 
   /// Loads the user's preferred language from secure storage.
   ///
   /// If no language is stored, it defaults to `'en'` (English).
-  Future<void> _loadLanguage() async {
-    String? storedLanguage = await _storage.read(key: 'language');
+  Future<void> loadLanguage() async {
+    String? storedLanguage = await STORAGE.read(key: 'language');
     setState(() {
-      _language = storedLanguage ?? 'en';
+      language = storedLanguage ?? 'en';
     });
   }
 
@@ -91,16 +91,16 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   /// If everything is valid, a loading indicator is shown, and the report is sent
   /// to the server via the [ApiService]. On success, a success message is shown,
   /// and the screen is popped. On failure, an error message is displayed.
-  Future<void> _submitReport() async {
+  Future<void> submitReport() async {
     FocusScope.of(context).unfocus(); // Close the keyboard
     try {
-      final description = descriptionController.text;
-      final location = locationController.text;
+      final description = description_controller.text;
+      final location = location_controller.text;
 
       // Check if all required fields are provided
-      if (description.isEmpty || location.isEmpty || _image == null) {
+      if (description.isEmpty || location.isEmpty || image == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalization.getString(_language, 'req_fields'))),
+          SnackBar(content: Text(AppLocalization.getString(language, 'req_fields'))),
         );
         return;
       }
@@ -118,19 +118,19 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
       final success = await ApiService().reportLostItem(
         description: description,
         location: location,
-        imagePath: _image!.path,
+        imagePath: image!.path,
       );
 
       Navigator.pop(context); // Close loading dialog
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalization.getString(_language, 'report_success'))),
+          SnackBar(content: Text(AppLocalization.getString(language, 'report_success'))),
         );
         Navigator.pop(context); // Close the form screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalization.getString(_language, 'report_fail'))),
+          SnackBar(content: Text(AppLocalization.getString(language, 'report_fail'))),
         );
       }
     } catch (e) {
@@ -144,40 +144,40 @@ class _ReportLostItemScreenState extends State<ReportLostItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalization.getString(_language, 'report_lost'))),
+      appBar: AppBar(title: Text(AppLocalization.getString(language, 'report_lost'))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              controller: descriptionController,
-              decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'item_desc')),
+              controller: description_controller,
+              decoration: InputDecoration(labelText: AppLocalization.getString(language, 'item_desc')),
             ),
             TextField(
-              controller: locationController,
-              decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'found_loc')),
+              controller: location_controller,
+              decoration: InputDecoration(labelText: AppLocalization.getString(language, 'found_loc')),
             ),
             const SizedBox(height: 10),
-            _image == null
-                ? Text(AppLocalization.getString(_language, 'no_img'))
-                : Image.file(_image!, height: 150, width: 150, fit: BoxFit.cover),
+            image == null
+                ? Text(AppLocalization.getString(language, 'no_img'))
+                : Image.file(image!, height: 150, width: 150, fit: BoxFit.cover),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () => _pickImage(ImageSource.camera),
-                  child: Text(AppLocalization.getString(_language, 'camera')),
+                  onPressed: () => pickImage(ImageSource.camera),
+                  child: Text(AppLocalization.getString(language, 'camera')),
                 ),
                 ElevatedButton(
-                  onPressed: () => _pickImage(ImageSource.gallery),
-                  child: Text(AppLocalization.getString(_language, 'gallery')),
+                  onPressed: () => pickImage(ImageSource.gallery),
+                  child: Text(AppLocalization.getString(language, 'gallery')),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _submitReport,
-              child: Text(AppLocalization.getString(_language, 'submit_report')),
+              onPressed: submitReport,
+              child: Text(AppLocalization.getString(language, 'submit_report')),
             ),
           ],
         ),

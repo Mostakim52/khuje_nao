@@ -7,7 +7,7 @@ class AppLocalization {
     /// and the values are maps of key-value pairs where the key is a string
     /// representing a specific item or message, and the value is the localized
     /// string for that item in the corresponding language.
-    static final Map<String, Map<String, String>> localizedValues = {
+    static final Map<String, Map<String, String>> localized_values = {
         'en': {
             'camera'         : 'Camera',
             'cancel'         : 'Cancel',
@@ -118,8 +118,8 @@ class AppLocalization {
 ///
 /// Returns the localized string for the [key] in the specified language.
   static String getString(String language_code, String key) {
-      return localizedValues[language_code]?[key]
-          ?? localizedValues['en']?[key]            //returns default language en if key is invalid
+      return localized_values[language_code]?[key]
+          ?? localized_values['en']?[key]            //returns default language en if key is invalid
           ?? key;
       }
   }

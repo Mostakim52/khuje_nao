@@ -16,38 +16,38 @@ class SearchLostItemsScreen extends StatefulWidget {
   const SearchLostItemsScreen({Key? key}) : super(key: key);
 
   @override
-  _SearchLostItemsScreenState createState() => _SearchLostItemsScreenState();
+  SearchLostItemsScreenState createState() => SearchLostItemsScreenState();
 }
 
-class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
+class SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
   /// Controller for the search query text field.
-  final TextEditingController queryController = TextEditingController();
+  final TextEditingController query_controller = TextEditingController();
 
   /// A list of search results containing information about the lost items.
-  List<Map<String, dynamic>> _searchResults = [];
+  List<Map<String, dynamic>> search_results = [];
 
   /// A boolean that indicates whether the search is in progress.
-  bool isLoading = false;
+  bool is_loading = false;
 
   /// An instance of [FlutterSecureStorage] to securely store user preferences.
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
 
   /// The language code for localization (default is 'en').
-  String _language = 'en';
+  String language = 'en';
 
   @override
   void initState() {
     super.initState();
-    _loadLanguage();
+    loadLanguage();
   }
 
   /// Loads the user's preferred language from secure storage.
   ///
   /// If no language is stored, it defaults to `'en'` (English).
-  Future<void> _loadLanguage() async {
-    String? storedLanguage = await _storage.read(key: 'language');
+  Future<void> loadLanguage() async {
+    String? stored_language = await STORAGE.read(key: 'language');
     setState(() {
-      _language = storedLanguage ?? 'en';
+      language = stored_language ?? 'en';
     });
   }
 
@@ -55,9 +55,9 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
   ///
   /// If the query is empty, a snackbar is shown prompting the user to enter a query.
   /// Otherwise, the search results are fetched from the server using [ApiService].
-  Future<void> _searchItems() async {
+  Future<void> searchItems() async {
     try {
-      final query = queryController.text;
+      final query = query_controller.text;
 
       // If the search query is empty, show an error message
       if (query.isEmpty) {
@@ -68,20 +68,20 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
       }
 
       setState(() {
-        isLoading = true;
+        is_loading = true;
       });
 
       // Fetch the search results from the backend
       final results = await ApiService().searchLostItems(query: query);
 
       setState(() {
-        _searchResults = results;
+        search_results = results;
       });
     } catch (e) {
       print('Error searching items: $e');
     } finally {
       setState(() {
-        isLoading = false;
+        is_loading = false;
       });
     }
   }
@@ -89,33 +89,33 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalization.getString(_language, 'search_lost'))),
+      appBar: AppBar(title: Text(AppLocalization.getString(language, 'search_lost'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             // Text field for entering search query
             TextField(
-              controller: queryController,
-              decoration: InputDecoration(labelText: AppLocalization.getString(_language, 'search_query')),
+              controller: query_controller,
+              decoration: InputDecoration(labelText: AppLocalization.getString(language, 'search_query')),
             ),
             const SizedBox(height: 20),
 
             // Search button
             ElevatedButton(
-              onPressed: _searchItems,
-              child: Text(AppLocalization.getString(_language, 'search')),
+              onPressed: searchItems,
+              child: Text(AppLocalization.getString(language, 'search')),
             ),
             const SizedBox(height: 20),
 
             // Display a loading indicator while the search is in progress
-            isLoading
+            is_loading
                 ? const Center(child: CircularProgressIndicator())
                 : Expanded(
               child: ListView.builder(
-                itemCount: _searchResults.length,
+                itemCount: search_results.length,
                 itemBuilder: (context, index) {
-                  final item = _searchResults[index];
+                  final item = search_results[index];
                   final reportedByEmail = item["reported_by"] ?? "";
                   return Card(
                     margin: const EdgeInsets.all(10),
@@ -164,7 +164,7 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
                               ),
                               // FutureBuilder to fetch the current user email and decide whether to show "Chat" or "Mark as Found" button
                               FutureBuilder<String?>(
-                                future: _storage.read(key: "email"), // Fetch current user email
+                                future: STORAGE.read(key: "email"), // Fetch current user email
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return const SizedBox(); // Show empty widget while loading
@@ -178,7 +178,7 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
                                     return ElevatedButton(
                                       onPressed: () async {
                                         // Save the receiver email to storage
-                                        await _storage.write(key: "receiver_email", value: reportedByEmail);
+                                        await STORAGE.write(key: "receiver_email", value: reportedByEmail);
 
                                         // Navigate to the ChatPage
                                         Navigator.push(
@@ -186,7 +186,7 @@ class _SearchLostItemsScreenState extends State<SearchLostItemsScreen> {
                                           MaterialPageRoute(builder: (context) => ChatPage()),
                                         );
                                       },
-                                      child: const Text("Chat"),
+                                      child: Text(AppLocalization.getString(language, 'chat')),
                                     );
                                   } else {
                                     return ElevatedButton(

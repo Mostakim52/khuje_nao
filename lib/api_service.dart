@@ -1,22 +1,30 @@
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+/// A service class to handle API calls for user authentication, lost items, and email-related tasks.
 class ApiService {
-  final String baseUrl = 'http://10.0.2.2:5000'; // Replace with your backend URL
-  final storage = const FlutterSecureStorage();
+  /// Base URL for the backend API.
+  final String base_url = 'https://alien-witty-monitor.ngrok-free.app'; // Replace with your backend URL
 
-  // Method for signing up users
-  Future<int> signup(String name, String email, String password, int nsu_id, String phone_number ) async {
+  /// Instance of [FlutterSecureStorage] to store secure data like tokens.
+  final STORAGE = const FlutterSecureStorage();
 
+  /// Signs up a new user by sending their details to the backend.
+  ///
+  /// Returns:
+  /// - `0` if the signup is successful.
+  /// - `-1` to `-5` for input validation errors (name, email, password, NSU ID, phone number).
+  /// - `-6` if signup fails due to server issues.
+  Future<int> signup(String name, String email, String password, int nsu_id, String phone_number) async {
+    // Input validation for various fields
     final nameRegExp = RegExp(r"^[a-zA-Z\s]{2,50}$");
     if (!nameRegExp.hasMatch(name)) {
-      return-1;
+      return -1;
     }
     final emailRegExp = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
-    if (!emailRegExp.hasMatch(email)){
+    if (!emailRegExp.hasMatch(email)) {
       return -2;
     }
     final passwordRegExp = RegExp(r"^(?=.*[A-Z])(?=.*\d).{8,}$");
@@ -24,7 +32,6 @@ class ApiService {
       return -3;
     }
     final nsuIdRegExp = RegExp(r"^\d{2}[1-3]\d{4}$");
-    print("NSU ID:" + nsu_id.toString());
     if (!nsuIdRegExp.hasMatch(nsu_id.toString())) {
       return -4;
     }
@@ -33,16 +40,17 @@ class ApiService {
       return -5;
     }
 
-    try{
+    try {
+      // Sending signup request to the server
       final response = await http.post(
-        Uri.parse('$baseUrl/signup'),
+        Uri.parse('$base_url/signup'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "name": name.toString(),
-          "email": email.toString(),
-          "phone_number" : phone_number.toString(),
-          "password": password.toString(),
-          "nsu_id" : nsu_id.toString()
+          "name": name,
+          "email": email,
+          "phone_number": phone_number,
+          "password": password,
+          "nsu_id": nsu_id.toString()
         }),
       );
 
@@ -53,18 +61,21 @@ class ApiService {
         print("Signup failed: ${response.body}");
         return -6;
       }
-    }
-    catch (e){
-      print("Signup failed" + e.toString());
+    } catch (e) {
+      print("Signup failed: $e");
       return -6;
     }
   }
 
-  // Method for logging in users
+  /// Logs in a user with their email and password.
+  ///
+  /// Returns:
+  /// - `0` if login is successful.
+  /// - `-1` or `-2` for validation errors in email or password.
+  /// - `-9` for any other login failure.
   Future<int> login(String email, String password) async {
-
     final emailRegExp = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
-    if (!emailRegExp.hasMatch(email)){
+    if (!emailRegExp.hasMatch(email)) {
       return -1;
     }
     final passwordRegExp = RegExp(r"^(?=.*[A-Z])(?=.*\d).{8,}$");
@@ -74,7 +85,7 @@ class ApiService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
+        Uri.parse('$base_url/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": email,
@@ -84,74 +95,62 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print(data.toString());
-        //String token = data['access_token'];
-        //await storage.write(key: "jwt_token", value: token);
-        await storage.write(key: "email", value: data["email"]);
+        await STORAGE.write(key: "email", value: data["email"]);
         print("Login successful! Token stored.");
         return 0;
       } else {
         print("Login failed: ${response.body}");
         return -9;
       }
-    }
-    catch(e){
-      print("Login failed." + e.toString());
+    } catch (e) {
+      print("Login failed: $e");
       return -9;
     }
   }
 
-  // Method to log out users by deleting the token
+  /// Logs out the user by deleting their stored token.
   Future<void> logout() async {
-    await storage.delete(key: "jwt_token");
+    await STORAGE.delete(key: "jwt_token");
     print("User logged out!");
   }
 
-
+  /// Reports a lost item by sending its description, location, and image to the backend.
+  ///
+  /// Returns `true` if the item is reported successfully, otherwise `false`.
   Future<bool> reportLostItem({
     required String description,
     required String location,
     required String imagePath,
   }) async {
     try {
-      String? email = await storage.read(key: "email");
-
+      String? email = await STORAGE.read(key: "email");
       if (email == null || email.isEmpty) {
         print('Email not found.');
         return false;
       }
-      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/lost-items'));
+      var request = http.MultipartRequest('POST', Uri.parse('$base_url/lost-items'));
       request.fields['description'] = description;
       request.fields['location'] = location;
       request.fields['reported_by'] = email;
       request.files.add(await http.MultipartFile.fromPath('image', imagePath));
-      print('Email being sent: $email');
-      final response = await request.send();
 
-      if (response.statusCode == 201) {
-        return true;
-      } else {
-        // Log server error response
-        print('Error: ${response.statusCode}');
-        return false;
-      }
+      final response = await request.send();
+      return response.statusCode == 201;
     } catch (e) {
       print('Error reporting lost item: $e');
       return false;
     }
   }
 
-
+  /// Marks an item as found by sending a request to the backend.
   Future<void> markItemAsFound(String itemId) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/lost-items/$itemId/found'),
+        Uri.parse('$base_url/lost-items/$itemId/found'),
       );
 
       if (response.statusCode == 200) {
         print('Item marked as found successfully!');
-      } else if (response.statusCode == 404) {
-        print('Item not found or already marked as found.');
       } else {
         print('Failed to mark item as found: ${response.statusCode}');
       }
@@ -160,15 +159,16 @@ class ApiService {
     }
   }
 
+  /// Sends emails related to lost items.
   Future<void> sendEmails() async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/send_lost_items_email'),
+        Uri.parse('$base_url/send_lost_items_email'),
       );
 
       if (response.statusCode == 200) {
         print('Emails sent successfully!');
-      } else if (response.statusCode == 404) {
+      } else {
         print('Failed to send emails.');
       }
     } catch (e) {
@@ -176,12 +176,14 @@ class ApiService {
     }
   }
 
-
+  /// Searches for lost items based on a query string.
+  ///
+  /// Returns a list of matching items.
   Future<List<Map<String, dynamic>>> searchLostItems({
     required String query,
   }) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/search-lost-items?query=$query'));
+      final response = await http.get(Uri.parse('$base_url/search-lost-items?query=$query'));
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
       } else {
@@ -194,27 +196,27 @@ class ApiService {
     }
   }
 
+  /// Sends an OTP to the user's email.
+  ///
+  /// Returns `true` if the OTP is sent successfully.
   Future<bool> sendOtp(String email) async {
-    // Make API call to send OTP
     final response = await http.post(
-      Uri.parse('$baseUrl/send_otp'),
+      Uri.parse('$base_url/send_otp'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
-
     return response.statusCode == 200;
   }
 
+  /// Verifies the OTP entered by the user.
+  ///
+  /// Returns `true` if the OTP is valid.
   Future<bool> verifyOtp(String email, String otp) async {
-    // Make API call to verify OTP
     final response = await http.post(
-      Uri.parse('$baseUrl/verify_otp'),
+      Uri.parse('$base_url/verify_otp'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'otp': otp}),
     );
-
     return response.statusCode == 200;
   }
-
-
 }

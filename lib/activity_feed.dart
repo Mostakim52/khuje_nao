@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:khuje_nao/api_service.dart';
 import 'package:khuje_nao/report_lost_item_screen.dart';
 import 'package:khuje_nao/search_lost_item_screen.dart';
@@ -22,31 +23,32 @@ import 'localization.dart';
 /// The screen shows two tabs: Lost Items and Found Items.
 class ActivityFeedPage extends StatefulWidget {
   @override
-  _ActivityFeedPageState createState() => _ActivityFeedPageState();
+  ActivityFeedPageState createState() => ActivityFeedPageState();
 }
 
 /// The state for [ActivityFeedPage] that manages the feed data and user interactions.
-class _ActivityFeedPageState extends State<ActivityFeedPage> {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  List<Map<String, dynamic>> lostItems = [];
-  List<Map<String, dynamic>> foundItems = [];
-  List<GlobalKey> _lostItemKeys = []; // List of keys for lost items
-  List<GlobalKey> _foundItemKeys = []; // List of keys for found items
-  String _language = 'en'; // Default language
-  bool isLoading = true;
+class ActivityFeedPageState extends State<ActivityFeedPage> {
+  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
+  final String base_url = 'https://alien-witty-monitor.ngrok-free.app';
+  List<Map<String, dynamic>> lost_items = [];
+  List<Map<String, dynamic>> found_items = [];
+  List<GlobalKey> lost_item_keys = []; // List of keys for lost items
+  List<GlobalKey> found_item_keys = []; // List of keys for found items
+  String language = 'en'; // Default language
+  bool is_loading = true;
 
   @override
   void initState() {
     super.initState();
     fetchItems();
-    _loadLanguage();
+    loadLanguage();
   }
 
   /// Loads the stored language preference from secure storage.
-  Future<void> _loadLanguage() async {
-    String? storedLanguage = await _storage.read(key: 'language');
+  Future<void> loadLanguage() async {
+    String? stored_language = await STORAGE.read(key: 'language');
     setState(() {
-      _language = storedLanguage ?? 'en';
+      language = stored_language ?? 'en';
     });
   }
 
@@ -54,27 +56,27 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   Future<void> fetchItems() async {
     try {
       setState(() {
-        isLoading = true;
+        is_loading = true;
       });
 
       final lostItemsResponse =
-      await http.get(Uri.parse('http://10.0.2.2:5000/lost-items'));
+      await http.get(Uri.parse('$base_url/lost-items'));
       final foundItemsResponse =
-      await http.get(Uri.parse('http://10.0.2.2:5000/found-items'));
+      await http.get(Uri.parse('$base_url/found-items'));
 
       if (lostItemsResponse.statusCode == 200 &&
           foundItemsResponse.statusCode == 200) {
         setState(() {
-          lostItems = List<Map<String, dynamic>>.from(
+          lost_items = List<Map<String, dynamic>>.from(
               json.decode(lostItemsResponse.body));
-          foundItems = List<Map<String, dynamic>>.from(
+          found_items = List<Map<String, dynamic>>.from(
               json.decode(foundItemsResponse.body));
 
           // Initialize keys for each list item
-          _lostItemKeys = List.generate(
-              lostItems.length, (index) => GlobalKey());
-          _foundItemKeys = List.generate(
-              foundItems.length, (index) => GlobalKey());
+          lost_item_keys = List.generate(
+              lost_items.length, (index) => GlobalKey());
+          found_item_keys = List.generate(
+              found_items.length, (index) => GlobalKey());
         });
       } else {
         print('Failed to fetch items. Status code: ${lostItemsResponse.statusCode}');
@@ -83,13 +85,13 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       print('Error fetching items: $e');
     } finally {
       setState(() {
-        isLoading = false;
+        is_loading = false;
       });
     }
   }
 
   /// Captures an image of the lost or found item and shares it.
-  Future<void> _captureAndShareCard(GlobalKey key) async {
+  Future<void> captureAndShareCard(GlobalKey key) async {
     try {
       // Wait until the widget has been fully rendered
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -114,7 +116,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             final XFile xFile = XFile(imagePath);
             await Share.shareXFiles(
               [xFile],
-              text: AppLocalization.getString(_language, 'share_msg'),
+              text: AppLocalization.getString(language, 'share_msg'),
               //text: 'Check out this lost item!',
             );
           }
@@ -128,8 +130,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   }
 
   /// Logs out the user by clearing the session and navigating to the login screen.
-  Future<void> _logout() async {
-    await _storage.deleteAll(); // Clear all stored session data
+  Future<void> logout() async {
+    await STORAGE.deleteAll(); // Clear all stored session data
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -149,7 +151,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       length: 2, // Two tabs: Lost Items and Found Items
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalization.getString(_language, 'feed')),
+          title: Text(AppLocalization.getString(language, 'feed')),
           //title: const Text('Activity Feed'),
           actions: [
             IconButton(
@@ -173,11 +175,11 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             IconButton(
               icon: const Icon(Icons.logout),
               tooltip: 'Logout',
-              onPressed: _logout,
+              onPressed: logout,
             ),
           ],
         ),
-        body: isLoading
+        body: is_loading
             ? const Center(child: CircularProgressIndicator())
             : Column(
           children: [
@@ -196,7 +198,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             const ReportLostItemScreen()),
                       );
                     },
-                    child: Text(AppLocalization.getString(_language,"report_lost")),
+                    child: Text(AppLocalization.getString(language,"report_lost")),
                     //child: const Text('Report Lost Item'),
                   ),
                   ElevatedButton(
@@ -208,7 +210,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             const SearchLostItemsScreen()),
                       );
                     },
-                    child: Text(AppLocalization.getString(_language, 'search_items')),
+                    child: Text(AppLocalization.getString(language, 'search_items')),
                     //child: const Text('Search Item'),
                   ),
                 ],
@@ -217,8 +219,8 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
             // TabBar
              TabBar(
               tabs: [
-                Tab(text: AppLocalization.getString(_language, 'lost_items')),
-                Tab(text: AppLocalization.getString(_language, 'found_items')),
+                Tab(text: AppLocalization.getString(language, 'lost_items')),
+                Tab(text: AppLocalization.getString(language, 'found_items')),
                 //Tab(text: "Lost Items"),
                // Tab(text: "Found Items"),
               ],
@@ -229,11 +231,11 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                 children: [
                   // Lost Items Tab
                   ListView.builder(
-                    itemCount: lostItems.length,
+                    itemCount: lost_items.length,
                     itemBuilder: (context, index) {
-                      final item = lostItems[index];
+                      final item = lost_items[index];
                       return RepaintBoundary(
-                      key: _lostItemKeys[index],
+                      key: lost_item_keys[index],
                         child: Card(
                         margin: const EdgeInsets.all(10),
                         child: Column(
@@ -281,7 +283,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       FutureBuilder<String?>(
-                                        future: _storage.read(key: "email"), // Fetch the current user email from storage
+                                        future: STORAGE.read(key: "email"), // Fetch the current user email from storage
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState == ConnectionState.waiting) {
                                             return const SizedBox(); // Show an empty widget while loading
@@ -295,7 +297,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                             return ElevatedButton(
                                               onPressed: () async {
                                                 // Save the receiver email to storage
-                                                await _storage.write(key: "receiver_email", value: reportedByEmail);
+                                                await STORAGE.write(key: "receiver_email", value: reportedByEmail);
 
                                                 // Navigate to the ChatPage
                                                 Navigator.push(
@@ -303,7 +305,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                                   MaterialPageRoute(builder: (context) => ChatPage()),
                                                 );
                                               },
-                                              child: const Text("Chat"),
+                                              child: Text(AppLocalization.getString(language, 'chat')),
                                             );
                                           } else {
                                             return
@@ -313,11 +315,11 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                                   await ApiService().markItemAsFound(itemId);
                                                   // Optionally show a confirmation dialog or refresh the list
                                                   ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text(AppLocalization.getString(_language, 'mark_msg'))),
+                                                    SnackBar(content: Text(AppLocalization.getString(language, 'mark_msg'))),
                                                     //const SnackBar(content: Text('Item marked as found')),
                                                   );
                                                 },
-                                                child: Text(AppLocalization.getString(_language, 'mark_found')),
+                                                child: Text(AppLocalization.getString(language, 'mark_found')),
                                                 //child: const Text("Mark as Found"),
                                               );
                                           }
@@ -330,9 +332,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     children: [
                                       ElevatedButton(
                                         onPressed: () async {
-                                          await _captureAndShareCard(_lostItemKeys[index]);  // Share the card content
+                                          await captureAndShareCard(lost_item_keys[index]);  // Share the card content
                                         },
-                                        child: Text(AppLocalization.getString(_language, 'share')),
+                                        child: Text(AppLocalization.getString(language, 'share')),
                                         //child: const Text("Share"),
                                       ),
                                     ],
@@ -350,71 +352,122 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
 
                   // Found Items Tab
                   ListView.builder(
-                    itemCount: foundItems.length,
+                    itemCount: found_items.length,
                     itemBuilder: (context, index) {
-                      final item = foundItems[index];
-                      key: _foundItemKeys[index]; // Use a unique key
-                      return Card(
-                        margin: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Display Image
-                            item["image"] != null && item["image"]!.isNotEmpty
-                                ? Image.network(
-                              item["image"]!,
-                              height: 300,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 50),
-                            )
-                                : Container(
-                              height: 150,
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.image_not_supported,
-                                  size: 50,
-                                  color: Colors.grey,
+                      final item = found_items[index];
+                      key: found_item_keys[index]; // Use a unique key
+                      return RepaintBoundary(
+                          key: lost_item_keys[index],
+                          child: Card(
+                            margin: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Display Image
+                                item["image"] != null && item["image"]!.isNotEmpty
+                                    ? Image.network(
+                                  item["image"]!,
+                                  height: 300,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image, size: 50),
+                                )
+                                    : Container(
+                                  height: 150,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item["description"] ?? "No description provided",
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "Location: ${item["location"] ?? "Unknown"}",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[700]),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Column(
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          await _captureAndShareCard(_foundItemKeys[index]);  // Share the card content
-                                        },
-                                        child: Text(AppLocalization.getString(_language, 'share')),
-                                        //child: const Text("Share"),
+                                      Text(
+                                        item["description"] ?? "No description provided",
+                                        style: const TextStyle(
+                                            fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        "Location: ${item["location"] ?? "Unknown"}",
+                                        style: TextStyle(
+                                            fontSize: 14, color: Colors.grey[700]),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          FutureBuilder<String?>(
+                                            future: STORAGE.read(key: "email"), // Fetch the current user email from storage
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                return const SizedBox(); // Show an empty widget while loading
+                                              }
+
+                                              final currentUserEmail = snapshot.data;
+                                              final reportedByEmail = item["reported_by"] ?? "";
+
+                                              // Only show the button if the current user's email is not the same as the reported_by email
+                                              if (currentUserEmail != null && currentUserEmail != reportedByEmail) {
+                                                return ElevatedButton(
+                                                  onPressed: () async {
+                                                    // Save the receiver email to storage
+                                                    await STORAGE.write(key: "receiver_email", value: reportedByEmail);
+
+                                                    // Navigate to the ChatPage
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) => ChatPage()),
+                                                    );
+                                                  },
+                                                  child: Text(AppLocalization.getString(language, 'chat')),
+                                                );
+                                              } else {
+                                                return
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      final itemId = item["_id"]; // Replace with the actual ID of the item to mark as found
+                                                      await ApiService().markItemAsFound(itemId);
+                                                      // Optionally show a confirmation dialog or refresh the list
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(content: Text(AppLocalization.getString(language, 'mark_msg'))),
+                                                        //const SnackBar(content: Text('Item marked as found')),
+                                                      );
+                                                    },
+                                                    child: Text(AppLocalization.getString(language, 'mark_found')),
+                                                    //child: const Text("Mark as Found"),
+                                                  );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Column(
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              await captureAndShareCard(lost_item_keys[index]);  // Share the card content
+                                            },
+                                            child: Text(AppLocalization.getString(language, 'share')),
+                                            //child: const Text("Share"),
+                                          ),
+                                        ],
+                                      ),
+
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          )
                       );
                     },
                   ),

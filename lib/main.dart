@@ -5,12 +5,17 @@ import 'signup_screen.dart';
 import 'login_screen.dart';
 import 'localization.dart';
 
-void main() async{
+/// The main entry point of the application.
+///
+/// Initializes notifications and runs the app.
+void main() async {
   NotificationService.initializeNotifications();
   runApp(const MyApp());
 }
 
+/// The root widget of the application.
 class MyApp extends StatelessWidget {
+  /// Constructor for [MyApp].
   const MyApp({super.key});
 
   @override
@@ -25,37 +30,46 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// The home screen of the app, where users can navigate to login or signup pages.
+///
+/// This widget also allows users to toggle between English and Bengali languages.
 class HomeScreen extends StatefulWidget {
+  /// Constructor for [HomeScreen].
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  String _language = 'en'; // Default language
+class HomeScreenState extends State<HomeScreen> {
+  /// Instance of [FlutterSecureStorage] to persist language preferences securely.
+  final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
+
+  /// Stores the current language code (`en` for English, `bd` for Bengali).
+  String language = 'en'; // Default language
 
   @override
   void initState() {
     super.initState();
-    _loadLanguage();
+    loadLanguage();
   }
 
-  // Load the language preference from secure storage
-  Future<void> _loadLanguage() async {
-    String? storedLanguage = await _storage.read(key: 'language');
+  /// Loads the user's preferred language from secure storage.
+  ///
+  /// If no language is found, defaults to English (`en`).
+  Future<void> loadLanguage() async {
+    String? storedLanguage = await STORAGE.read(key: 'language');
     setState(() {
-      _language = storedLanguage ?? 'en';
+      language = storedLanguage ?? 'en';
     });
   }
 
-  // Toggle the language and update storage
-  Future<void> _toggleLanguage() async {
-    String newLanguage = _language == 'en' ? 'bd' : 'en';
-    await _storage.write(key: 'language', value: newLanguage);
+  /// Toggles the language between English (`en`) and Bengali (`bd`) and updates secure storage.
+  Future<void> toggleLanguage() async {
+    String newLanguage = language == 'en' ? 'bd' : 'en';
+    await STORAGE.write(key: 'language', value: newLanguage);
     setState(() {
-      _language = newLanguage;
+      language = newLanguage;
     });
   }
 
@@ -66,9 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Welcome to Khuje Nao'),
         actions: [
           ElevatedButton(
-            onPressed: _toggleLanguage,
+            onPressed: toggleLanguage,
             child: Text(
-              _language == 'en' ? 'বাংলা' : 'English',
+              language == 'en' ? 'বাংলা' : 'English',
               style: const TextStyle(color: Colors.black),
             ),
           ),
@@ -85,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               },
-              child: Text(AppLocalization.getString(_language, 'signup')),
+              child: Text(AppLocalization.getString(language, 'signup')),
             ),
             ElevatedButton(
               onPressed: () {
@@ -94,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: Text(AppLocalization.getString(_language, 'login')),
+              child: Text(AppLocalization.getString(language, 'login')),
             ),
           ],
         ),
