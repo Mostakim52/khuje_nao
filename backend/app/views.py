@@ -483,7 +483,7 @@ def send_lost_item_email(to_email, lost_items_count):
     @param to_email: The recipient's email address.
     @param lost_items_count: The number of lost items to report.
     """
-    from_email = Email("smartfreelancehub@gmail.com")  # Your email
+    from_email = Email(os.getenv("SENDGRID_EMAIL"))  # Your email
     to_email = To(to_email)  # Recipient's email
     subject = "Lost Items Notification"
 
