@@ -83,6 +83,7 @@ backend/
 ├── .env                  # Environment variables (API keys, DB configs)
 ├── .gitignore            # Files to be ignored by Git
 ├── config.py             # Configuration settings (dev, prod)
+├── requirements.txt      # Downloading dependencies
 └── run.py                # Entry point to start the Flask application
 ```
 
