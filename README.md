@@ -42,6 +42,7 @@ flutter run
 ```
 ### Backend imports
 ```
+You can also do 'pip install requirements.txt' to install backend dpeendencies
 Use python 3.9
 pip install flask
 pip install Flask-Cors
