@@ -61,6 +61,9 @@
 </h1></div>
 
     
+<section class="desc markdown">
+  <p>A service class to handle API calls for user authentication, lost items, and email-related tasks.</p>
+</section>
 
 
 
@@ -83,14 +86,14 @@
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
-        <dt id="baseUrl" class="property">
-  <span class="name"><a href="../api_service/ApiService/baseUrl.html">baseUrl</a></span>
+        <dt id="base_url" class="property">
+  <span class="name"><a href="../api_service/ApiService/base_url.html">base_url</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
   
 
 </dt>
 <dd>
-  
+  Base URL for the backend API.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -119,14 +122,14 @@
 
 </dd>
 
-        <dt id="storage" class="property">
-  <span class="name"><a href="../api_service/ApiService/storage.html">storage</a></span>
+        <dt id="STORAGE" class="property">
+  <span class="name"><a href="../api_service/ApiService/STORAGE.html">STORAGE</a></span>
   <span class="signature">&#8594; <a href="https://pub.dev/documentation/flutter_secure_storage/9.2.2/flutter_secure_storage/FlutterSecureStorage-class.html">FlutterSecureStorage</a></span>
   
 
 </dt>
 <dd>
-  
+  Instance of <a href="https://pub.dev/documentation/flutter_secure_storage/9.2.2/flutter_secure_storage/FlutterSecureStorage-class.html">FlutterSecureStorage</a> to store secure data like tokens.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -147,7 +150,7 @@
 
 </dt>
 <dd>
-  
+  Logs in a user with their email and password.
   
 
 </dd>
@@ -160,7 +163,7 @@
 
 </dt>
 <dd>
-  
+  Logs out the user by deleting their stored token.
   
 
 </dd>
@@ -173,7 +176,7 @@
 
 </dt>
 <dd>
-  
+  Marks an item as found by sending a request to the backend.
   
 
 </dd>
@@ -199,7 +202,7 @@
 
 </dt>
 <dd>
-  
+  Reports a lost item by sending its description, location, and image to the backend.
   
 
 </dd>
@@ -212,7 +215,7 @@
 
 </dt>
 <dd>
-  
+  Searches for lost items based on a query string.
   
 
 </dd>
@@ -225,7 +228,7 @@
 
 </dt>
 <dd>
-  
+  Sends emails related to lost items.
   
 
 </dd>
@@ -238,7 +241,7 @@
 
 </dt>
 <dd>
-  
+  Sends an OTP to the user's email.
   
 
 </dd>
@@ -251,7 +254,7 @@
 
 </dt>
 <dd>
-  
+  Signs up a new user by sending their details to the backend.
   
 
 </dd>
@@ -277,7 +280,7 @@
 
 </dt>
 <dd>
-  
+  Verifies the OTP entered by the user.
   
 
 </dd>

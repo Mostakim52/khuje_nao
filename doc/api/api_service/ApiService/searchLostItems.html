@@ -71,6 +71,10 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Searches for lost items based on a query string.</p>
+<p>Returns a list of matching items.</p>
+</section>
 
 
     
@@ -80,7 +84,7 @@
   required String query,
 }) async {
   try {
-    final response = await http.get(Uri.parse(&#39;$baseUrl&#47;search-lost-items?query=$query&#39;));
+    final response = await http.get(Uri.parse(&#39;$base_url&#47;search-lost-items?query=$query&#39;));
     if (response.statusCode == 200) {
       return List&lt;Map&lt;String, dynamic&gt;&gt;.from(jsonDecode(response.body));
     } else {

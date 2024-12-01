@@ -50,6 +50,132 @@
 
   <div id="dartdoc-main-content" class="main-content">
       
+<section class="desc markdown">
+  <p><img src="https://github.com/user-attachments/assets/300591ee-933c-4227-9467-c4e8af6736f3" alt="appstore"></p>
+<h1 id="-khuje-nao---a-flutter-app-for-finding-lost-items-in-north-south-university">📱 Khuje Nao - A Flutter App for Finding Lost Items in North South University</h1>
+<p><strong>📖 Overview</strong> <br>
+Khuje Nao is a Flutter-based mobile application designed to help users report and find lost items. Users can sign up, log in, chat with other users, and report lost items with details and images. It features a clean UI and integrates with a backend API for real-time data management.</p>
+<h2 id="-features">✨ Features</h2>
+<ul>
+<li>🔐 User Authentication: Sign up, log in, and log out securely using an API.</li>
+<li>💬 Chat Functionality: Communicate with others in real-time via a chat interface.</li>
+<li>📄 Lost Item Reporting: Submit detailed reports for lost items, including images and location.</li>
+<li>🔍 Search Functionality: Search for lost items using keywords.</li>
+<li>🌐 Multi-language Support: Choose between different languages (English, Bangla, etc.).</li>
+<li>📧 Email Notifications: Notify users about updates and newly reported items.</li>
+</ul>
+<h2 id="-technologies-used">🛠️ Technologies Used</h2>
+<ul>
+<li>Flutter (Frontend)</li>
+<li>Dart (Programming Language)</li>
+<li>HTTP (API Calls)</li>
+<li>Flutter Secure Storage (For securely storing user data)</li>
+<li>Awesome Notifications (For push notifications)</li>
+<li>Backend API (Flask backend)</li>
+</ul>
+<h2 id="-getting-started">🚀 Getting Started</h2>
+<ul>
+<li><a href="https://flutter.dev/">Flutter SDK</a></li>
+<li><a href="https://dart.dev/">Dart</a></li>
+<li><a href="https://docs.python.org/3/">Python</a></li>
+<li><a href="https://flask.palletsprojects.com/en/stable/">Flask</a></li>
+<li>A connected mobile device or emulator (You can use <a href="https://developer.android.com/studio">Android Studio</a>)</li>
+</ul>
+<h3 id="installation">Installation</h3>
+<pre class="language-dart"><code>git clone https://github.com/yourusername/khuje-nao.git
+cd khuje-nao
+</code></pre>
+<h3 id="install-dependencies">Install dependencies</h3>
+<pre class="language-dart"><code>flutter pub get
+</code></pre>
+<h3 id="run-the-app">Run the app</h3>
+<pre class="language-dart"><code>flutter run
+</code></pre>
+<h3 id="backend-imports">Backend imports</h3>
+<pre class="language-dart"><code>Use python 3.9
+pip install flask
+pip install Flask-Cors
+pip install Flask-PyMongo
+pip install python-dotenv
+pip install sendgrid
+</code></pre>
+<h3 id="backend-sendgrid-api">Backend SendGrid API</h3>
+<p><a href="https://sendgrid.com/en-us">SendGrid</a> is needed for sending OTP.
+Create .env file at backend to have these:</p>
+<pre class="language-dart"><code>export SENDGRID_API_KEY='Your key'
+export SENDGRID_EMAIL='Your email'
+</code></pre>
+<h2 id="-project-structure">📁 Project Structure</h2>
+<p>Frontend App</p>
+<pre class="language-dart"><code>├── lib
+│   ├── main.dart              # Entry point of the app
+│   ├── screens/               # UI screens like Login, Signup, Chat
+│   ├── services/              # API services and business logic
+│   ├── widgets/               # Reusable widgets
+│   ├── localization/          # Language-specific strings
+│   └── models/                # Data models (User, Message, etc.)
+├── assets/                    # Images and static files
+├── android/
+├── doc
+├── backend
+└── test/                      # Unit and widget tests
+</code></pre>
+<p>Backend Server</p>
+<pre class="language-dart"><code>backend/
+├── app/
+│   ├── __init__.py       # Application factory and initialization
+│   ├── models.py         # Database models
+│   ├── utils.py          # Utility functions
+│   └── views.py          # API routes and request handling
+├── static/               # Static files (images, stylesheets, etc.)
+├── docs/
+├── tests/
+├── .env                  # Environment variables (API keys, DB configs)
+├── .gitignore            # Files to be ignored by Git
+├── config.py             # Configuration settings (dev, prod)
+└── run.py                # Entry point to start the Flask application
+</code></pre>
+<h2 id="-running-tests">🧪 Running Tests</h2>
+<pre class="language-dart"><code>flutter test
+</code></pre>
+<h2 id="-api-endpoints">📮 API Endpoints</h2>
+<table>
+  <thead>
+    <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+  <tbody><tr><td><code>/signup</code></td><td>POST</td>
+    <td>Sign up a new user</td></tr><tr><td><code>/login</code></td><td>POST</td><td>Log in an existing user</td></tr><tr><td><code>/lost-item</code></td><td>POST</td><td>Report a lost item</td></tr>
+    <tr><td><code>/search-lost-items</code></td><td>GET</td><td>Search for lost items</td></tr>
+    <tr><td><code>/send-message</code></td><td>POST</td><td>Send message</td></tr>
+    <tr><td><code>/get-messages</code></td><td>GET</td><td>Get messages</td></tr>
+    <tr><td><code>/get-chats</code></td><td>GET</td><td>Get the latest message for each chat</td></tr>
+    <tr><td><code>/found-items</code></td><td>GET</td><td>Get found items</td></tr>
+    <tr><td><code>/activity-feed</code></td><td>GET</td><td>Get activity feed</td></tr>
+    <tr><td><code>/lost-items</code></td><td>GET</td><td>Get lost items</td></tr>
+    <tr><td><code>/lost-items-admin</code></td><td>GET</td><td>Get lost items for admin approval</td></tr>
+    <tr><td><code>/lost-items/<item_id>/approve</item_id></code></td><td>POST</td><td>Approve lost items (Admin)</td></tr>
+    <tr><td><code>/send_lost_items_email</code></td><td>POST</td><td>Sends email to users about lost items</td></tr>
+    <tr><td><code>/lost-items/item_id/found</code></td><td>POST</td><td>Mark lost items as found</td></tr>
+    <tr><td><code>/send_otp</code></td><td>POST</td><td>Send OTP for verification</td></tr><tr><td><code>/verify_otp</code></td><td>POST</td><td>Verify OTP</td></tr>
+    </tbody>
+</table>
+<h2 id="-contributors">🧑‍💻 Contributors</h2>
+<div style="display: inline-block; position: relative; width: 50px; height: 50px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd;">
+  <a href="https://github.com/Mostakim52">
+    <img src="https://avatars.githubusercontent.com/u/104221451?v=4" style="width: 10%; height: 10%; object-fit: cover;">
+  </a>
+  <a href="https://github.com/Emran-Emon">
+    <img src="https://avatars.githubusercontent.com/u/97731993?v=4" style="width: 10%; height: 10%; object-fit: cover;">
+  </a>
+  <a href="https://github.com/Md-Musfiq-Hossain">
+    <img src="https://avatars.githubusercontent.com/u/160261648?v=4" style="width: 10%; height: 10%; object-fit: cover;">
+  </a>
+  <a href="https://github.com/RPAhNaf">
+    <img src="https://avatars.githubusercontent.com/u/160027571?v=4" style="width: 10%; height: 10%; object-fit: cover;">
+  </a>
+</div>
+<h2 id="-feedback">📝 Feedback</h2>
+<p>If you have any suggestions or issues, feel free to open an issue on GitHub or reach out at <a href="mailto:guyawesome96@gmail.com">guyawesome96@gmail.com</a>.</p>
+</section>
 
 
       <section class="summary">

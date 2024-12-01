@@ -88,7 +88,7 @@ It requires the item ID to identify the item in the database.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; updateStatus(String itemId) async {
-    final url = Uri.parse(&#39;$serverurl&#47;lost-items&#47;$itemId&#47;found&#39;); &#47;&#47;  endpoint
+    final url = Uri.parse(&#39;$server_url&#47;lost-items&#47;$itemId&#47;found&#39;); &#47;&#47;  endpoint
 
     try {
     &#47;&#47; Sending a POST request to mark the item as found

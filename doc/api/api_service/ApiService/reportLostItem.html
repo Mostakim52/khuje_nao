@@ -73,6 +73,10 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Reports a lost item by sending its description, location, and image to the backend.</p>
+<p>Returns <code>true</code> if the item is reported successfully, otherwise <code>false</code>.</p>
+</section>
 
 
     
@@ -84,27 +88,19 @@
   required String imagePath,
 }) async {
   try {
-    String? email = await storage.read(key: &quot;email&quot;);
-
+    String? email = await STORAGE.read(key: &quot;email&quot;);
     if (email == null || email.isEmpty) {
       print(&#39;Email not found.&#39;);
       return false;
     }
-    var request = http.MultipartRequest(&#39;POST&#39;, Uri.parse(&#39;$baseUrl&#47;lost-items&#39;));
+    var request = http.MultipartRequest(&#39;POST&#39;, Uri.parse(&#39;$base_url&#47;lost-items&#39;));
     request.fields[&#39;description&#39;] = description;
     request.fields[&#39;location&#39;] = location;
     request.fields[&#39;reported_by&#39;] = email;
     request.files.add(await http.MultipartFile.fromPath(&#39;image&#39;, imagePath));
-    print(&#39;Email being sent: $email&#39;);
-    final response = await request.send();
 
-    if (response.statusCode == 201) {
-      return true;
-    } else {
-      &#47;&#47; Log server error response
-      print(&#39;Error: ${response.statusCode}&#39;);
-      return false;
-    }
+    final response = await request.send();
+    return response.statusCode == 201;
   } catch (e) {
     print(&#39;Error reporting lost item: $e&#39;);
     return false;

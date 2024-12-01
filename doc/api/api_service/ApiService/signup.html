@@ -75,19 +75,28 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Signs up a new user by sending their details to the backend.</p>
+<p>Returns:</p>
+<ul>
+<li><code>0</code> if the signup is successful.</li>
+<li><code>-1</code> to <code>-5</code> for input validation errors (name, email, password, NSU ID, phone number).</li>
+<li><code>-6</code> if signup fails due to server issues.</li>
+</ul>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; signup(String name, String email, String password, int nsu_id, String phone_number ) async {
-
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; signup(String name, String email, String password, int nsu_id, String phone_number) async {
+  &#47;&#47; Input validation for various fields
   final nameRegExp = RegExp(r&quot;^[a-zA-Z\s]{2,50}$&quot;);
   if (!nameRegExp.hasMatch(name)) {
-    return-1;
+    return -1;
   }
   final emailRegExp = RegExp(r&quot;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&quot;);
-  if (!emailRegExp.hasMatch(email)){
+  if (!emailRegExp.hasMatch(email)) {
     return -2;
   }
   final passwordRegExp = RegExp(r&quot;^(?=.*[A-Z])(?=.*\d).{8,}$&quot;);
@@ -95,7 +104,6 @@
     return -3;
   }
   final nsuIdRegExp = RegExp(r&quot;^\d{2}[1-3]\d{4}$&quot;);
-  print(&quot;NSU ID:&quot; + nsu_id.toString());
   if (!nsuIdRegExp.hasMatch(nsu_id.toString())) {
     return -4;
   }
@@ -104,16 +112,17 @@
     return -5;
   }
 
-  try{
+  try {
+    &#47;&#47; Sending signup request to the server
     final response = await http.post(
-      Uri.parse(&#39;$baseUrl&#47;signup&#39;),
+      Uri.parse(&#39;$base_url&#47;signup&#39;),
       headers: {&quot;Content-Type&quot;: &quot;application&#47;json&quot;},
       body: jsonEncode({
-        &quot;name&quot;: name.toString(),
-        &quot;email&quot;: email.toString(),
-        &quot;phone_number&quot; : phone_number.toString(),
-        &quot;password&quot;: password.toString(),
-        &quot;nsu_id&quot; : nsu_id.toString()
+        &quot;name&quot;: name,
+        &quot;email&quot;: email,
+        &quot;phone_number&quot;: phone_number,
+        &quot;password&quot;: password,
+        &quot;nsu_id&quot;: nsu_id.toString()
       }),
     );
 
@@ -124,9 +133,8 @@
       print(&quot;Signup failed: ${response.body}&quot;);
       return -6;
     }
-  }
-  catch (e){
-    print(&quot;Signup failed&quot; + e.toString());
+  } catch (e) {
+    print(&quot;Signup failed: $e&quot;);
     return -6;
   }
 }</code></pre>

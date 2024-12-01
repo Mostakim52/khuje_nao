@@ -72,19 +72,21 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Verifies the OTP entered by the user.</p>
+<p>Returns <code>true</code> if the OTP is valid.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; verifyOtp(String email, String otp) async {
-  &#47;&#47; Make API call to verify OTP
   final response = await http.post(
-    Uri.parse(&#39;$baseUrl&#47;verify_otp&#39;),
+    Uri.parse(&#39;$base_url&#47;verify_otp&#39;),
     headers: {&#39;Content-Type&#39;: &#39;application&#47;json&#39;},
     body: jsonEncode({&#39;email&#39;: email, &#39;otp&#39;: otp}),
   );
-
   return response.statusCode == 200;
 }</code></pre>
 </section>

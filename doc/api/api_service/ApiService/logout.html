@@ -70,13 +70,16 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Logs out the user by deleting their stored token.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; logout() async {
-  await storage.delete(key: &quot;jwt_token&quot;);
+  await STORAGE.delete(key: &quot;jwt_token&quot;);
   print(&quot;User logged out!&quot;);
 }</code></pre>
 </section>

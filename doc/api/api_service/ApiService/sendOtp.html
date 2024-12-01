@@ -71,19 +71,21 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Sends an OTP to the user's email.</p>
+<p>Returns <code>true</code> if the OTP is sent successfully.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; sendOtp(String email) async {
-  &#47;&#47; Make API call to send OTP
   final response = await http.post(
-    Uri.parse(&#39;$baseUrl&#47;send_otp&#39;),
+    Uri.parse(&#39;$base_url&#47;send_otp&#39;),
     headers: {&#39;Content-Type&#39;: &#39;application&#47;json&#39;},
     body: jsonEncode({&#39;email&#39;: email}),
   );
-
   return response.statusCode == 200;
 }</code></pre>
 </section>

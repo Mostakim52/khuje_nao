@@ -83,7 +83,7 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; sendMessageToServer(types.TextMessage message) async {
   try {
     final response = await http.post(
-      Uri.parse(&#39;$server_url&#47;send_message&#39;),
+      Uri.parse(&#39;$base_url&#47;send_message&#39;),
       headers: {&#39;Content-Type&#39;: &#39;application&#47;json&#39;},
       body: jsonEncode({
         &#39;text&#39;: message.text,

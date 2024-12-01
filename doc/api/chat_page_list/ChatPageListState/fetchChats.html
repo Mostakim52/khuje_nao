@@ -86,7 +86,7 @@ and populates the <code>chats</code> list with the response data.</p>
     if (email != null) {
       curren_user_email = email;
       final response = await http.post(
-        Uri.parse(&#39;http:&#47;&#47;10.0.2.2:5000&#47;get_chats&#39;),
+        Uri.parse(&#39;$base_url&#47;get_chats&#39;),
         headers: {&#39;Content-Type&#39;: &#39;application&#47;json&#39;},
         body: jsonEncode({&#39;user_id&#39;: email}),
       );

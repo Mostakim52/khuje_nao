@@ -71,6 +71,9 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Marks an item as found by sending a request to the backend.</p>
+</section>
 
 
     
@@ -79,13 +82,11 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; markItemAsFound(String itemId) async {
   try {
     final response = await http.post(
-      Uri.parse(&#39;$baseUrl&#47;lost-items&#47;$itemId&#47;found&#39;),
+      Uri.parse(&#39;$base_url&#47;lost-items&#47;$itemId&#47;found&#39;),
     );
 
     if (response.statusCode == 200) {
       print(&#39;Item marked as found successfully!&#39;);
-    } else if (response.statusCode == 404) {
-      print(&#39;Item not found or already marked as found.&#39;);
     } else {
       print(&#39;Failed to mark item as found: ${response.statusCode}&#39;);
     }

@@ -72,15 +72,23 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Logs in a user with their email and password.</p>
+<p>Returns:</p>
+<ul>
+<li><code>0</code> if login is successful.</li>
+<li><code>-1</code> or <code>-2</code> for validation errors in email or password.</li>
+<li><code>-9</code> for any other login failure.</li>
+</ul>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; login(String email, String password) async {
-
   final emailRegExp = RegExp(r&quot;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&quot;);
-  if (!emailRegExp.hasMatch(email)){
+  if (!emailRegExp.hasMatch(email)) {
     return -1;
   }
   final passwordRegExp = RegExp(r&quot;^(?=.*[A-Z])(?=.*\d).{8,}$&quot;);
@@ -90,7 +98,7 @@
 
   try {
     final response = await http.post(
-      Uri.parse(&#39;$baseUrl&#47;login&#39;),
+      Uri.parse(&#39;$base_url&#47;login&#39;),
       headers: {&quot;Content-Type&quot;: &quot;application&#47;json&quot;},
       body: jsonEncode({
         &quot;email&quot;: email,
@@ -100,19 +108,15 @@
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print(data.toString());
-      &#47;&#47;String token = data[&#39;access_token&#39;];
-      &#47;&#47;await storage.write(key: &quot;jwt_token&quot;, value: token);
-      await storage.write(key: &quot;email&quot;, value: data[&quot;email&quot;]);
+      await STORAGE.write(key: &quot;email&quot;, value: data[&quot;email&quot;]);
       print(&quot;Login successful! Token stored.&quot;);
       return 0;
     } else {
       print(&quot;Login failed: ${response.body}&quot;);
       return -9;
     }
-  }
-  catch(e){
-    print(&quot;Login failed.&quot; + e.toString());
+  } catch (e) {
+    print(&quot;Login failed: $e&quot;);
     return -9;
   }
 }</code></pre>

@@ -88,8 +88,8 @@ does not exist in the default language, the method will return the <code>key</co
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static String getString(String language_code, String key) {
-      return localizedValues[language_code]?[key]
-          ?? localizedValues[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
+      return localized_values[language_code]?[key]
+          ?? localized_values[&#39;en&#39;]?[key]            &#47;&#47;returns default language en if key is invalid
           ?? key;
       }</code></pre>
 </section>

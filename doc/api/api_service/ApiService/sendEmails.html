@@ -70,6 +70,9 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Sends emails related to lost items.</p>
+</section>
 
 
     
@@ -78,12 +81,12 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; sendEmails() async {
   try {
     final response = await http.post(
-      Uri.parse(&#39;$baseUrl&#47;send_lost_items_email&#39;),
+      Uri.parse(&#39;$base_url&#47;send_lost_items_email&#39;),
     );
 
     if (response.statusCode == 200) {
       print(&#39;Emails sent successfully!&#39;);
-    } else if (response.statusCode == 404) {
+    } else {
       print(&#39;Failed to send emails.&#39;);
     }
   } catch (e) {
