@@ -84,6 +84,7 @@ backend/
 │   └── views.py          # API routes and request handling
 ├── static/               # Static files (images, stylesheets, etc.)
 ├── docs/
+├── tests/
 ├── .env                  # Environment variables (API keys, DB configs)
 ├── .gitignore            # Files to be ignored by Git
 ├── config.py             # Configuration settings (dev, prod)
