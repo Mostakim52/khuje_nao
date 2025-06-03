@@ -17,7 +17,7 @@ class Config:
     This key should be kept confidential to ensure the security of user sessions.
     """
     
-    MONGO_URI = "mongodb://localhost:27017/khuje_nao"
+    MONGO_URI = os.getenv("MONGO_ONLINE_URL")
     """
     URI for connecting to the MongoDB database.
 
