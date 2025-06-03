@@ -5,5 +5,5 @@ SendGrid
 python-dotenv
 bcrypt
 pymongo
-bson
 werkzeug
+gunicorn
