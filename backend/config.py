@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Load variables from a .env file (only needed for local development)
+load_dotenv()
 
 class Config:
     """
@@ -10,17 +14,17 @@ class Config:
         SECRET_KEY (str): Secret key used for securing sessions and cookies.
         MONGO_URI (str): URI for connecting to the MongoDB database.
     """
-    SECRET_KEY = "mysecretkey"
+
+    SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
     """
     Secret key used for securing sessions and cookies.
-    
     This key should be kept confidential to ensure the security of user sessions.
     """
-    
+
     MONGO_URI = os.getenv("MONGO_ONLINE_URL")
     """
     URI for connecting to the MongoDB database.
 
-    This URI defines the location and database name for the app's MongoDB instance. 
-    It uses the default MongoDB port 27017 and connects to the `khuje_nao` database.
+    Tries to read MONGO_ONLINE_URL from environment variables first (ideal for production).
+    Falls back to localhost MongoDB for local development if not set.
     """
