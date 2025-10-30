@@ -4,12 +4,25 @@ import 'notification_service.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
 import 'localization.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 /// The main entry point of the application.
 ///
 /// Initializes notifications and runs the app.
 void main() async {
-  NotificationService.initializeNotifications();
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    NotificationService.initializeNotifications();
+  } catch (e) {
+    debugPrint('Notification init failed: $e');
+  }
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
   runApp(const MyApp());
 }
 
