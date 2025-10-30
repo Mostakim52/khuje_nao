@@ -11,6 +11,11 @@ class ApiService {
   /// Instance of [FlutterSecureStorage] to store secure data like tokens.
   final STORAGE = const FlutterSecureStorage();
 
+  Map<String, String> _headers(String token) => {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+
   /// Signs up a new user by sending their details to the backend.
   ///
   /// Returns:
@@ -219,4 +224,44 @@ class ApiService {
     );
     return response.statusCode == 200;
   }
+
+  /// Verifies a Firebase Google ID token with the backend for secure login.
+  Future<bool> firebaseGoogleLogin(String idToken) async {
+    final response = await http.post(
+      Uri.parse('$base_url/firebase-google-login'), // Backend endpoint must verify the token
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'idToken': idToken}),
+    );
+    if (response.statusCode == 200) {
+      // Optionally: store any user/session info returned
+      return true;
+    }
+    return false;
+  }
+
+  // Save or update profile fields server-side tied to Firebase uid
+  Future<bool> completeProfileWithToken({
+    required String token,
+    required String name,
+    required int nsuId,
+    required String phone,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$base_url/profile'),
+      headers: _headers(token),
+      body: jsonEncode({'name': name, 'nsu_id': nsuId, 'phone': phone}),
+    );
+    return res.statusCode == 200 || res.statusCode == 201;
+  }
+
+  // Optional: fetch profile to prefill name/NSU if it already exists
+  Future<Map<String, dynamic>?> getProfile(String token) async {
+    final res = await http.get(
+      Uri.parse('$base_url/profile'),
+      headers: _headers(token),
+    );
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    return null;
+  }
+
 }

@@ -6,6 +6,8 @@ import 'package:khuje_nao/admin_page.dart';
 import 'package:khuje_nao/localization.dart';
 import 'package:khuje_nao/main.dart';
 import 'api_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// `LoginScreen` is a StatefulWidget that handles user login and OTP verification.
 /// It provides functionality for remembering user credentials, submitting login details,
@@ -171,6 +173,32 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // Cancelled
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+      if (idToken == null) {
+        showResponseDialog("Google sign-in failed: No ID token.");
+        return;
+      }
+      final response = await api_service.firebaseGoogleLogin(idToken);
+      if (response) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ActivityFeedPage()));
+      } else {
+        showResponseDialog("Google Sign-In backend verification failed.");
+      }
+    } catch (e) {
+      showResponseDialog("Google Sign-In error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,6 +246,12 @@ class LoginScreenState extends State<LoginScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               const SizedBox(height: 20),
+              // Google Sign-In button
+              ElevatedButton(
+                onPressed: signInWithGoogle,
+                child: const Text("Sign in with Google"),
+              ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: login,
                 child: Text(AppLocalization.getString(language, "login")),

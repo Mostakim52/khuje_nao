@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:khuje_nao/login_screen.dart';
+import 'activity_feed.dart';
 import 'api_service.dart';
+import 'google_phone_onboarding.dart';
 import 'localization.dart';
 
 /// `SignupScreen` is a StatefulWidget that handles the user sign-up process.
@@ -152,6 +154,25 @@ class SignupScreenState extends State<SignupScreen> {
                 onPressed: signup,
                 child: Text(AppLocalization.getString(language, "signup")),
               ),
+
+              // In login_screen.dart (or signup_screen.dart):
+              ElevatedButton(
+                onPressed: () async {
+                  final ok = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const GooglePhoneOnboarding()),
+                  );
+                  if (ok == true && context.mounted) {
+                    // Go to your main page after onboarding
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => ActivityFeedPage()),
+                    );
+                  }
+                },
+                child: const Text('Continue with Google + Phone OTP'),
+              ),
+
             ],
           ),
         ),

@@ -11,18 +11,9 @@ import 'firebase_options.dart';
 /// Initializes notifications and runs the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    NotificationService.initializeNotifications();
-  } catch (e) {
-    debugPrint('Notification init failed: $e');
-  }
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint('Firebase init failed: $e');
-  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // uses your firebase_options.dart
   runApp(const MyApp());
 }
 
