@@ -58,4 +58,11 @@ def create_app():
     from .views import main_bp
     app.register_blueprint(main_bp)
 
+    # Register auth blueprint (Firebase/OTP/Profiles)
+    try:
+        from .auth import auth_bp
+        app.register_blueprint(auth_bp, url_prefix='/')
+    except Exception as e:
+        logger.warning(f"Auth blueprint not registered: {e}")
+
     return app

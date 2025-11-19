@@ -17,19 +17,55 @@ void main() async {
   runApp(const MyApp());
 }
 
-/// The root widget of the application.
-class MyApp extends StatelessWidget {
-  /// Constructor for [MyApp].
+/// The root widget of the application with theme handling.
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  ThemeMode _themeMode = ThemeMode.light;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final saved = await _storage.read(key: 'theme_mode');
+    setState(() {
+      _themeMode = saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  Future<void> _toggleTheme() async {
+    final next = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    setState(() {
+      _themeMode = next;
+    });
+    await _storage.write(key: 'theme_mode', value: next == ThemeMode.dark ? 'dark' : 'light');
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Khuje Nao',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+        brightness: Brightness.light,
       ),
-      home: const HomeScreen(),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+        useMaterial3: true,
+        brightness: Brightness.dark,
+      ),
+      themeMode: _themeMode,
+      home: HomeScreen(onToggleTheme: _toggleTheme, themeMode: _themeMode),
     );
   }
 }
@@ -39,7 +75,10 @@ class MyApp extends StatelessWidget {
 /// This widget also allows users to toggle between English and Bengali languages.
 class HomeScreen extends StatefulWidget {
   /// Constructor for [HomeScreen].
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.onToggleTheme, required this.themeMode});
+
+  final Future<void> Function() onToggleTheme;
+  final ThemeMode themeMode;
 
   @override
   HomeScreenState createState() => HomeScreenState();
@@ -83,6 +122,11 @@ class HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Welcome to Khuje Nao'),
         actions: [
+          IconButton(
+            tooltip: 'Toggle theme',
+            onPressed: widget.onToggleTheme,
+            icon: Icon(widget.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode),
+          ),
           ElevatedButton(
             onPressed: toggleLanguage,
             child: Text(

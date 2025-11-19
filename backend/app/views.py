@@ -259,51 +259,7 @@ def activity_feed():
 
 
 
-##Added by Mostakim
-
-import random
-import time
-import sendgrid
-from dotenv import load_dotenv
-from sendgrid.helpers.mail import Mail, Email, To, Content
-import os
-load_dotenv()
-
-# SendGrid API Client
-sg = sendgrid.SendGridAPIClient(api_key=os.getenv("SENDGRID_API_KEY"))  # Ensure the API key is set
-
-# Temporary storage for OTP (Use a better storage like Redis or a database in production)
-otp_storage = {}
-
-# Generate OTP (6-digit)
-def generate_otp():
-    """
-    Generates a 6-digit One-Time Password (OTP).
-    
-    @return: A randomly generated 6-digit OTP.
-    """
-    return random.randint(100000, 999999)
-
-# Send OTP to user's email
-def send_otp_email(to_email, otp):
-    """
-    Sends an OTP to the specified email address using SendGrid API.
-
-    @param to_email: The recipient's email address.
-    @param otp: The OTP to be sent in the email.
-    """
-    from_email = Email("smartfreelancehub@gmail.com")  # Your email
-    to_email = To(to_email)  # Recipient's email
-    subject = "Your OTP Code"
-    content = Content("text/plain", f"Your OTP code is: {otp}")
-
-    mail = Mail(from_email, to_email, subject, content)
-
-    try:
-        response = sg.send(mail)
-        print(f"Email sent with status code {response.status_code}")
-    except Exception as e:
-        print(str(e))
+## Messaging and chat endpoints
 
 @main_bp.route('/send_message', methods=['POST'])
 def send_message():
@@ -346,69 +302,8 @@ def get_messages():
 
     return jsonify(messages), 200
 
-@main_bp.route('/send_otp', methods=['POST'])
-def send_otp():
-    """
-    Endpoint to send an OTP to the user's email.
-
-    This endpoint expects a JSON body with the user's `email`. 
-    It generates and sends an OTP to the provided email address.
-
-    @return: JSON response indicating whether the OTP was sent successfully.
-    """
-    data = request.json
-    email = data.get('email')
-
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-
-    otp = generate_otp()
-
-    # Store OTP and expiration time (expires after 5 minutes)
-    otp_storage[email] = {'otp': otp, 'timestamp': time.time()}
-
-    # Send OTP to email
-    send_otp_email(email, otp)
-
-    return jsonify({"message": "OTP sent successfully to email"}), 200
-
-@main_bp.route('/verify_otp', methods=['POST'])
-def verify_otp():
-    """
-    Endpoint to verify the OTP entered by the user.
-
-    This endpoint expects a JSON body with `email` and `otp`. 
-    It checks whether the OTP is correct and has not expired.
-
-    @return: JSON response indicating whether the OTP was successfully verified.
-    """
-    data = request.json
-    email = data.get('email')
-    otp = data.get('otp')
-
-    if not email or not otp:
-        return jsonify({"error": "Email and OTP are required"}), 400
-
-    # Check if OTP exists for the given email
-    if email not in otp_storage:
-        return jsonify({"error": "No OTP sent for this email"}), 400
-
-    stored_otp = otp_storage[email]['otp']
-    timestamp = otp_storage[email]['timestamp']
-
-    # Check if OTP has expired (5 minutes)
-    if time.time() - timestamp > 300:
-        del otp_storage[email]  # Remove expired OTP
-        return jsonify({"error": "OTP has expired"}), 400
-
-    # Check if the entered OTP is correct
-    if int(otp) == stored_otp:
-        del otp_storage[email]  # OTP successfully verified, remove it
-        return jsonify({"message": "OTP verified successfully"}), 200
-    else:
-        return jsonify({"error": "Invalid OTP"}), 400
-
 from . import mongo
+
 @main_bp.route('/get_chats', methods=['POST'])
 def get_chats():
     """
@@ -476,113 +371,7 @@ def search_lost_items():
 
     return jsonify(result), 200
 
-def send_lost_item_email(to_email, lost_items_count):
-    """
-    Sends a notification email about the number of lost items.
-
-    @param to_email: The recipient's email address.
-    @param lost_items_count: The number of lost items to report.
-    """
-    from_email = Email(os.getenv("SENDGRID_EMAIL"))  # Your email
-    to_email = To(to_email)  # Recipient's email
-    subject = "Lost Items Notification"
-
-    # Create a beautiful HTML email with the lost item count
-    content = Content(
-        "text/html", 
-        f"""
-        <html>
-            <head>
-                <style>
-                    body {{
-                        font-family: Arial, sans-serif;
-                        color: #333;
-                        background-color: #f4f4f4;
-                        padding: 20px;
-                    }}
-                    .container {{
-                        max-width: 600px;
-                        margin: 0 auto;
-                        padding: 20px;
-                        background-color: #fff;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    }}
-                    h1 {{
-                        color: #4CAF50;
-                        text-align: center;
-                    }}
-                    p {{
-                        font-size: 16px;
-                        line-height: 1.6;
-                    }}
-                    .button {{
-                        display: inline-block;
-                        padding: 12px 25px;
-                        background-color: #4CAF50;
-                        color: white;
-                        text-align: center;
-                        border-radius: 5px;
-                        text-decoration: none;
-                    }}
-                    .footer {{
-                        font-size: 12px;
-                        text-align: center;
-                        color: #aaa;
-                        margin-top: 20px;
-                    }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Lost Item Notification</h1>
-                    <p>Dear User,</p>
-                    <p><strong>{lost_items_count}</strong> lost item(s) are in NSU that you might want to check.</p>
-                    <p>Visit Khuje Nao App to see more details.</p>
-                    <p>If you find them, please report them back.</p>
-                    <div class="footer">
-                        <p>&copy; {time.strftime('%Y')} Khuje Nao. All rights reserved.</p>
-                    </div>
-                </div>
-            </body>
-        </html>
-        """
-    )
-
-    mail = Mail(from_email, to_email, subject, content)
-
-    try:
-        response = sg.send(mail)
-        ##print(f"Email sent with status code {response.status_code}")
-    except Exception as e:
-        print(f"Error sending email: {e}")
-
-@main_bp.route('/send_lost_items_email', methods=['POST'])
-def send_lost_items_email():
-    """
-    Endpoint to send a notification email about lost items to all users.
-
-    This endpoint fetches the count of lost items and sends an email to all registered users
-    notifying them of the number of lost items.
-    """
-    # Fetch lost items count from database using LostItemModel
-    lost_items_count = mongo.db.lost_items.count_documents({"is_found": False})  # Count lost items
-
-    if lost_items_count == 0:
-        return jsonify({"message": "No lost items to report"}), 200
-
-    # Fetch all user emails from the Users collection using UserModel
-    users = mongo.db.users.find()  # Fetch all users from the users collection
-
-    # Send the email to each user
-    count = 0
-    for user in users:
-        count+=1
-        email = user.get("email")
-        if email:
-            send_lost_item_email(email, lost_items_count)
-
-    return jsonify({"message": f"Lost items email sent to {count} users"}), 200
+## Removed email OTP and SendGrid email features
 
 
 

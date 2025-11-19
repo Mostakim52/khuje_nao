@@ -1,9 +1,10 @@
 Flask
 Flask-PyMongo
 Flask-CORS
-SendGrid
 python-dotenv
 bcrypt
 pymongo
 werkzeug
 gunicorn
+firebase-admin
+PyJWT

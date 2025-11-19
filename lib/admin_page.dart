@@ -102,7 +102,7 @@ class AdminPageState extends State<AdminPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                api_service.sendEmails();
+                //api_service.sendEmails();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Emails submitted successfully.')),
                 );

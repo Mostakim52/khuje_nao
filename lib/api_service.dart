@@ -164,22 +164,7 @@ class ApiService {
     }
   }
 
-  /// Sends emails related to lost items.
-  Future<void> sendEmails() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$base_url/send_lost_items_email'),
-      );
-
-      if (response.statusCode == 200) {
-        print('Emails sent successfully!');
-      } else {
-        print('Failed to send emails.');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
+  // Removed email broadcast feature
 
   /// Searches for lost items based on a query string.
   ///
@@ -201,29 +186,7 @@ class ApiService {
     }
   }
 
-  /// Sends an OTP to the user's email.
-  ///
-  /// Returns `true` if the OTP is sent successfully.
-  Future<bool> sendOtp(String email) async {
-    final response = await http.post(
-      Uri.parse('$base_url/send_otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email}),
-    );
-    return response.statusCode == 200;
-  }
-
-  /// Verifies the OTP entered by the user.
-  ///
-  /// Returns `true` if the OTP is valid.
-  Future<bool> verifyOtp(String email, String otp) async {
-    final response = await http.post(
-      Uri.parse('$base_url/verify_otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'otp': otp}),
-    );
-    return response.statusCode == 200;
-  }
+  // OTP endpoints removed
 
   /// Verifies a Firebase Google ID token with the backend for secure login.
   Future<bool> firebaseGoogleLogin(String idToken) async {

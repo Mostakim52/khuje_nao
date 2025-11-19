@@ -44,6 +44,7 @@ class SignupScreenState extends State<SignupScreen> {
   /// User's phone number entered during sign-up.
   String phone_number = '';
 
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +81,8 @@ class SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  // OTP removed for signup flow
+
   /// Handles user sign-up.
   ///
   /// This method validates the form and sends the sign-up details (name, email, password, NSU ID, and phone number)
@@ -94,11 +97,12 @@ class SignupScreenState extends State<SignupScreen> {
         case -4: showResponseDialog(AppLocalization.getString(language, "invalid_id"));
         case -5: showResponseDialog(AppLocalization.getString(language, "invalid_phone"));
         case -6: showResponseDialog(AppLocalization.getString(language, "signup_fail"));
-        case 0: showResponseDialog("Sign Up Successful");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
+        case 0:
+          showResponseDialog("Sign Up Successful");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
       }
     }
   }

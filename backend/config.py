@@ -21,7 +21,12 @@ class Config:
     This key should be kept confidential to ensure the security of user sessions.
     """
 
-    MONGO_URI = os.getenv("MONGO_ONLINE_URL")
+    # Prefer cloud connection string; allow MONGO_URI alias; fallback to local MongoDB
+    MONGO_URI = (
+        os.getenv("MONGO_ONLINE_URL")
+        or os.getenv("MONGO_URI")
+        or "mongodb://localhost:27017/khuje_nao"
+    )
     """
     URI for connecting to the MongoDB database.
 

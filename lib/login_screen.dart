@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:khuje_nao/activity_feed.dart';
@@ -9,9 +8,8 @@ import 'api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-/// `LoginScreen` is a StatefulWidget that handles user login and OTP verification.
-/// It provides functionality for remembering user credentials, submitting login details,
-/// and verifying OTP sent to the user’s email.
+/// `LoginScreen` handles user login and Google sign-in.
+/// It supports remembering credentials and navigating on success.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -41,8 +39,6 @@ class LoginScreenState extends State<LoginScreen> {
   /// Tracks whether the "Remember Me" checkbox is selected.
   bool remember_me = false;
 
-  /// Stores the OTP entered by the user for verification.
-  String otp = '';
 
   @override
   void initState() {
@@ -93,45 +89,7 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// Displays an OTP verification dialog where the user can input the OTP sent to their email.
-  void showOtpDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalization.getString(language, "otp_send") + email),
-          content: TextField(
-            onChanged: (value) => otp = value,  // Store OTP entered by the user
-            decoration: const InputDecoration(labelText: "OTP"),
-            keyboardType: TextInputType.number,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context),  // Close the dialog
-              child: Text(AppLocalization.getString(language, "cancel")),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final is_valid_otp = await api_service.verifyOtp(email, otp);
-                if (is_valid_otp) {
-                  Navigator.pop(context);  // Close dialog
-                  showResponseDialog(AppLocalization.getString(language, "otp_verified"));
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => ActivityFeedPage()),
-                  );
-                } else {
-                  showResponseDialog(AppLocalization.getString(language, "otp_invalid"));
-                  STORAGE.delete(key: 'email'); // Delete stored email on OTP failure
-                }
-              },
-              child: Text(AppLocalization.getString(language, "verify")),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // OTP flow removed
 
   /// Handles user login.
   ///
@@ -161,13 +119,11 @@ class LoginScreenState extends State<LoginScreen> {
           if (remember_me) {
             await STORAGE.write(key: 'email', value: email); // Save email securely
           }
-          final otpSent = await api_service.sendOtp(email);
-          if (otpSent) {
-            showOtpDialog(); // Show the OTP dialog
-          } else {
-            showResponseDialog("Failed to send OTP. Please try again.");
-            STORAGE.delete(key: 'email'); // Delete stored email if OTP fails
-          }
+          // OTP removed; navigate directly
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => ActivityFeedPage()),
+          );
           break;
       }
     }
@@ -206,12 +162,7 @@ class LoginScreenState extends State<LoginScreen> {
         title: Text(AppLocalization.getString(language, "login")),
         actions: [
           ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            },
+            onPressed: () => Navigator.pop(context),
             child: Text(AppLocalization.getString(language, "go_home")),
           ),
         ],
