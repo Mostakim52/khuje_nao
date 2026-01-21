@@ -11,6 +11,7 @@ from flask import Flask
 from flask_cors import CORS
 from firebase_admin import credentials, initialize_app, get_app
 from config import Config
+import json
 
 # Get the base directory of the application
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -28,6 +29,11 @@ def create_app():
     Returns:
         Flask: The initialized Flask application instance.
     """
+    firebase_cred_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+    if firebase_cred_json:
+        cred = credentials.Certificate(json.loads(firebase_cred_json))
+        initialize_app(cred)
+
     # Create the Flask app instance
     app = Flask(__name__)
 
