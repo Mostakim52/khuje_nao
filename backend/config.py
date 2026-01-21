@@ -21,15 +21,35 @@ class Config:
     This key should be kept confidential to ensure the security of user sessions.
     """
 
-    # Prefer cloud connection string; allow MONGO_URI alias; fallback to local MongoDB
-    MONGO_URI = (
-        os.getenv("MONGO_ONLINE_URL")
-        or os.getenv("MONGO_URI")
-        or "mongodb://localhost:27017/khuje_nao"
-    )
+    # Firebase configuration
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     """
-    URI for connecting to the MongoDB database.
-
-    Tries to read MONGO_ONLINE_URL from environment variables first (ideal for production).
-    Falls back to localhost MongoDB for local development if not set.
+    Path to Firebase service account credentials JSON file.
+    Required for Firebase Admin SDK to access Firestore.
+    """
+    
+    # AppWrite Storage configuration
+    APPWRITE_ENDPOINT = os.getenv("APPWRITE_ENDPOINT", "")
+    """
+    AppWrite server endpoint URL.
+    Example: https://cloud.appwrite.io/v1 (for cloud) or http://localhost/v1 (for self-hosted)
+    """
+    
+    APPWRITE_PROJECT_ID = os.getenv("APPWRITE_PROJECT_ID", "")
+    """
+    AppWrite project ID.
+    Found in AppWrite Console → Settings → General.
+    """
+    
+    APPWRITE_API_KEY = os.getenv("APPWRITE_API_KEY", "")
+    """
+    AppWrite API Key (Server/Admin key).
+    Found in AppWrite Console → Settings → API Keys.
+    Use a key with 'files.write' permission.
+    """
+    
+    APPWRITE_STORAGE_BUCKET_ID = os.getenv("APPWRITE_STORAGE_BUCKET_ID", "")
+    """
+    AppWrite Storage Bucket ID.
+    Create a bucket in AppWrite Console → Storage and use its ID.
     """

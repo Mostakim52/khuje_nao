@@ -44,3 +44,77 @@ app.*.map.json
 /ios
 README.md
 .dart_tool
+
+# Secrets and credentials - NEVER commit these
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.json
+!pubspec.json
+!package.json
+!tsconfig.json
+backend/firebase_key/
+backend/**/*firebase-adminsdk*.json
+backend/**/*-adminsdk-*.json
+backend/**/google-services.json
+backend/**/GoogleService-Info.plist
+firebase_key/
+*.credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Firebase
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+.firebaserc
+
+# Vercel
+.vercel
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp

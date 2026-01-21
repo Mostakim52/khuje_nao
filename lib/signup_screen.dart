@@ -3,12 +3,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:khuje_nao/login_screen.dart';
 import 'activity_feed.dart';
 import 'api_service.dart';
-import 'google_phone_onboarding.dart';
 import 'localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:khuje_nao/profile_completion_screen.dart';
 
-/// `SignupScreen` is a StatefulWidget that handles the user sign-up process.
-/// It provides a form for users to enter their name, email, password, NSU ID,
-/// and phone number, and handles submission of the sign-up request to the server.
+/// `SignupScreen` handles user sign-up via Google Sign-In only.
+/// Users must select their @northsouth.edu Google account to sign up.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -20,30 +21,14 @@ class SignupScreenState extends State<SignupScreen> {
   /// The `ApiService` instance used to interact with the backend API for sign-up.
   final ApiService api_service = ApiService();
 
-  /// The global key used for form validation.
-  final form_key = GlobalKey<FormState>();
-
   /// Secure storage used to persist sensitive data such as the preferred language.
   final STORAGE = const FlutterSecureStorage();
 
   /// The current selected language (default is English).
   String language = 'en';
 
-  /// User's name entered during sign-up.
-  String name = '';
-
-  /// User's email entered during sign-up.
-  String email = '';
-
-  /// User's password entered during sign-up.
-  String password = '';
-
-  /// User's NSU ID entered during sign-up.
-  int nsu_id = 0;
-
-  /// User's phone number entered during sign-up.
-  String phone_number = '';
-
+  /// Loading state for Google Sign-In
+  bool is_loading = false;
 
   @override
   void initState() {
@@ -73,7 +58,7 @@ class SignupScreenState extends State<SignupScreen> {
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
               },
-              child: const Text("Okay"),
+              child: Text(AppLocalization.getString(language, "okay")),
             ),
           ],
         );
@@ -81,29 +66,92 @@ class SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // OTP removed for signup flow
+  /// Handles Google Sign-In for sign-up.
+  /// Checks if user exists in database, if no - goes to profile completion, if yes - shows error.
+  Future<void> signUpWithGoogle() async {
+    setState(() {
+      is_loading = true;
+    });
 
-  /// Handles user sign-up.
-  ///
-  /// This method validates the form and sends the sign-up details (name, email, password, NSU ID, and phone number)
-  /// to the backend. Depending on the response, it shows appropriate messages.
-  Future<void> signup() async {
-    if (form_key.currentState!.validate()) {
-      int response = await api_service.signup(name, email, password, nsu_id, phone_number);
-      switch(response) {
-        case -1: showResponseDialog(AppLocalization.getString(language, "invalid_name"));
-        case -2: showResponseDialog(AppLocalization.getString(language, "invalid_mail"));
-        case -3: showResponseDialog(AppLocalization.getString(language, "invalid_pass"));
-        case -4: showResponseDialog(AppLocalization.getString(language, "invalid_id"));
-        case -5: showResponseDialog(AppLocalization.getString(language, "invalid_phone"));
-        case -6: showResponseDialog(AppLocalization.getString(language, "signup_fail"));
-        case 0:
-          showResponseDialog("Sign Up Successful");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
+    try {
+      // Show account picker (all Google accounts on device)
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        setState(() {
+          is_loading = false;
+        });
+        return; // User cancelled
       }
+
+      final email = googleUser.email;
+      if (email == null || !email.endsWith('@northsouth.edu')) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("Only @northsouth.edu email accounts are allowed. Please select your North South University account.");
+        return;
+      }
+
+      // Check if user already exists in database
+      final userExists = await api_service.checkUserExists(email);
+      if (userExists) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("An account with this email already exists. Please sign in instead.");
+        return;
+      }
+
+      // User doesn't exist - proceed with Firebase authentication and profile completion
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+      if (idToken == null) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("Google sign-in failed: No ID token.");
+        return;
+      }
+
+      // Verify with backend (this will create a placeholder profile)
+      final response = await api_service.firebaseGoogleLogin(idToken);
+      if (!response) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("Google Sign-In backend verification failed.");
+        return;
+      }
+
+      // Store email for session
+      await STORAGE.write(key: 'email', value: email);
+
+      setState(() {
+        is_loading = false;
+      });
+
+      // Navigate to profile completion screen
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileCompletionScreen(idToken: idToken)),
+      );
+      
+      if (result == true && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ActivityFeedPage()),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        is_loading = false;
+      });
+      showResponseDialog("Google Sign-In error: $e");
     }
   }
 
@@ -111,72 +159,44 @@ class SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalization.getString(language, "signup"))),
-      body: Form(
-        key: form_key,
+      body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              /// Name text field
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "name")),
-                onChanged: (value) => setState(() => name = value),
+              Icon(
+                Icons.person_add,
+                size: 80,
+                color: Colors.green,
               ),
-
-              /// Email text field
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "email")),
-                keyboardType: TextInputType.emailAddress,
-                onChanged: (value) => setState(() => email = value),
+              const SizedBox(height: 24),
+              Text(
+                'Create your account\nwith North South University',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-
-              /// Password text field
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "password")),
-                obscureText: true,
-                onChanged: (value) => setState(() => password = value),
+              const SizedBox(height: 8),
+              Text(
+                'Select your @northsouth.edu Google account',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
               ),
-
-              /// NSU ID text field
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "id")),
-                keyboardType: TextInputType.number,
-                onChanged: (value) => setState(() => nsu_id = int.parse(value)),
-              ),
-
-              /// Phone number text field
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "phone_no")),
-                keyboardType: TextInputType.phone,
-                onChanged: (value) => setState(() => phone_number = value),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// Sign-up button
-              ElevatedButton(
-                onPressed: signup,
-                child: Text(AppLocalization.getString(language, "signup")),
-              ),
-
-              // In login_screen.dart (or signup_screen.dart):
-              ElevatedButton(
-                onPressed: () async {
-                  final ok = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const GooglePhoneOnboarding()),
-                  );
-                  if (ok == true && context.mounted) {
-                    // Go to your main page after onboarding
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => ActivityFeedPage()),
-                    );
-                  }
-                },
-                child: const Text('Continue with Google + Phone OTP'),
-              ),
-
+              const SizedBox(height: 48),
+              if (is_loading)
+                const CircularProgressIndicator()
+              else
+                ElevatedButton.icon(
+                  onPressed: signUpWithGoogle,
+                  icon: const Icon(Icons.account_circle),
+                  label: const Text("Sign up with Google"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                ),
             ],
           ),
         ),

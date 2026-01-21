@@ -2,18 +2,15 @@
 __init__.py
 
 This module initializes the Flask application, configures the app settings, 
-and sets up integrations like MongoDB and CORS.
+and sets up integrations like Firebase/Firestore and CORS.
 """
 
 import os
 import logging
 from flask import Flask
-from flask_pymongo import PyMongo
 from flask_cors import CORS
+from firebase_admin import credentials, initialize_app, get_app
 from config import Config
-
-# Initialize PyMongo
-mongo = PyMongo()
 
 # Get the base directory of the application
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -24,7 +21,7 @@ def create_app():
     Creates and configures the Flask application.
 
     The application is configured with:
-        - Flask-PyMongo for MongoDB integration.
+        - Firebase Admin SDK for Firestore integration.
         - Flask-CORS for Cross-Origin Resource Sharing.
         - Logging for debugging and monitoring.
 
@@ -32,19 +29,31 @@ def create_app():
         Flask: The initialized Flask application instance.
     """
     # Create the Flask app instance
-    app = Flask(__name__, static_url_path='', static_folder='static')
+    app = Flask(__name__)
 
     # Load configuration from the Config object
     app.config.from_object(Config)
 
-    # Set the upload folder for file uploads
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static', 'uploads')
-
-    # Define allowed file extensions for uploads
+    # Define allowed file extensions for uploads (used for validation)
     app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
-    # Initialize PyMongo with the app configuration
-    mongo.init_app(app)
+    # Initialize Firebase Admin SDK
+    try:
+        get_app()  # Check if Firebase is already initialized
+    except ValueError:
+        # Firebase not initialized, initialize it now
+        cred_path = Config.GOOGLE_APPLICATION_CREDENTIALS
+        if cred_path and os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            initialize_app(cred)
+        else:
+            # Try to use default credentials (e.g., from environment or GCP)
+            try:
+                initialize_app()
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Firebase initialization failed: {e}")
+                logger.warning("Firebase will be initialized later when needed (e.g., in auth module)")
 
     # Enable Cross-Origin Resource Sharing (CORS)
     CORS(app)

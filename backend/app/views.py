@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify, current_app, url_for, send_from_directory
+from flask import Blueprint, request, jsonify
 from .models import UserModel, LostItemModel, MessageModel, FoundItemModel
 from .utils import hash_password, check_password, is_valid_phone_number, is_valid_nsu_id
+from .storage import upload_image_to_storage
 import os
 from werkzeug.utils import secure_filename
 
@@ -92,17 +93,7 @@ def signup():
     user_id = UserModel.create_user(data)
     return jsonify({"message": "User created successfully", "id": user_id}), 201
 
-@main_bp.route('/uploads/<filename>', endpoint='uploaded_file')
-def uploaded_file(filename):
-    """
-    Endpoint to serve uploaded files.
-
-    This endpoint returns the file from the upload directory.
-
-    @param filename: The name of the file to retrieve.
-    @return: The requested file.
-    """
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+# Removed local filesystem upload endpoint - images are now served directly from AppWrite Storage URLs
 
 @main_bp.route('/lost-items', methods=['POST'])
 def report_lost_item():
@@ -114,8 +105,8 @@ def report_lost_item():
 
     @return: JSON response with success message or error.
     """
-    image_path = None
-    # Handling image upload
+    image_url = None
+    # Handling image upload to AppWrite Storage
     if 'image' in request.files:
         file = request.files['image']
 
@@ -123,13 +114,14 @@ def report_lost_item():
             return jsonify({"error": "No selected file"}), 400
 
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            upload_folder = current_app.config['UPLOAD_FOLDER']
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
-            file.save(os.path.join(upload_folder, filename))
-            image_path = f"uploads/{filename}"
-            print(f"Image saved at: {os.path.join(upload_folder, filename)}")
+            try:
+                filename = secure_filename(file.filename)
+                # Read file data
+                file_data = file.read()
+                # Upload to AppWrite Storage
+                image_url = upload_image_to_storage(file_data, filename, folder='lost-items')
+            except Exception as e:
+                return jsonify({"error": f"Failed to upload image: {str(e)}"}), 500
         else:
             return jsonify({"error": "Invalid file type"}), 400
 
@@ -148,7 +140,7 @@ def report_lost_item():
     lost_item_id = LostItemModel.report_lost_item(
         description=description,
         location=location,
-        image_path=image_path,  # Use the uploaded image path
+        image_path=image_url,  # Store AppWrite Storage URL
         reported_by=reported_by,
     )
     return jsonify({"message": "Lost item reported successfully", "id": lost_item_id}), 201
@@ -168,9 +160,10 @@ def get_lost_items():
 
     items = LostItemModel.get_lost_items(limit=limit, skip=skip)
 
+    # Image URLs are already stored in image_path field (Firebase Storage URLs)
     for item in items:
         if "image_path" in item and item["image_path"]:
-            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+            item["image"] = item["image_path"]  # Use Firebase Storage URL directly
         else:
             item["image"] = None
     
@@ -233,9 +226,10 @@ def get_found_items():
     
     items = FoundItemModel.get_found_items(limit=limit, skip=skip)
 
+    # Image URLs are already stored in image_path field (Firebase Storage URLs)
     for item in items:
         if "image_path" in item and item["image_path"]:
-            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+            item["image"] = item["image_path"]  # Use Firebase Storage URL directly
         else:
             item["image"] = None
             
@@ -296,13 +290,12 @@ def get_messages():
 
     messages = MessageModel.get_messages(author_id, receiver_id, limit=limit, skip=skip)
     
-    # Convert ObjectId to string for JSON serialization
+    # Convert _id to string if it exists (Firestore already returns string IDs)
     for message in messages:
-        message["_id"] = str(message["_id"])
+        if "_id" in message:
+            message["_id"] = str(message["_id"])
 
     return jsonify(messages), 200
-
-from . import mongo
 
 @main_bp.route('/get_chats', methods=['POST'])
 def get_chats():
@@ -317,26 +310,11 @@ def get_chats():
     data = request.json
     user_id = data.get("user_id")  # Current user ID/email
 
-    # Find all chats where the current user is either the author or the receiver
-    chats = mongo.db.messages.aggregate([
-        {"$match": {"$or": [{"author_id": user_id}, {"receiver_id": user_id}]}},
-        {"$group": {
-            "_id": {"$cond": [{"$eq": ["$author_id", user_id]}, "$receiver_id", "$author_id"]},
-            "latest_message": {"$last": "$$ROOT"}  # Get the latest message for each chat
-        }},
-        {"$project": {
-            "chat_id": "$_id",
-            "latest_message": 1
-        }}
-    ])
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
 
-    chat_list = []
-    for chat in chats:
-        chat_list.append({
-            "chat_id": chat["chat_id"],
-            "latest_message": chat["latest_message"]["text"],
-            "latest_message_time": chat["latest_message"]["created_at"],
-        })
+    # Use MessageModel method to get chats
+    chat_list = MessageModel.get_chats_for_user(user_id)
 
     return jsonify(chat_list), 200
 
@@ -354,20 +332,31 @@ def search_lost_items():
     if not query:
         return jsonify({"error": "No search query provided"}), 400
 
-    # Perform MongoDB text search on the 'description' and 'name' fields
-    items = mongo.db.lost_items.find(
-        {"description": query}  # MongoDB text search
-    ).limit(20)
+    # Firestore doesn't support full-text search natively, so we do a simple contains check
+    # For production, consider using Algolia or similar for full-text search
+    from firebase_admin import firestore
+    db = firestore.client()
+    items_ref = db.collection('lost_items')
+    
+    # Query for approved and not found items where description contains query (case-insensitive)
+    # Note: Firestore doesn't support case-insensitive contains, so we'll filter in Python
+    query_result = items_ref.where('is_approved', '==', True).where('is_found', '==', False).limit(100).stream()
 
     result = []
-    for item in items:
-        result.append({
-            "_id": str(item["_id"]),
-            "description": item.get("description"),
-            "location": item.get("location"),
-            "image": url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True),  # Return the image path
-            "reported_by": item.get("reported_by")
-        })
+    query_lower = query.lower()
+    for doc in query_result:
+        item = doc.to_dict()
+        description = item.get("description", "").lower()
+        if query_lower in description:
+            result.append({
+                "_id": doc.id,
+                "description": item.get("description"),
+                "location": item.get("location"),
+                "image": item.get("image_path") if item.get("image_path") else None,  # Use AppWrite Storage URL directly
+                "reported_by": item.get("reported_by")
+            })
+            if len(result) >= 20:
+                break
 
     return jsonify(result), 200
 
@@ -375,7 +364,8 @@ def search_lost_items():
 
 
 
-from bson import ObjectId
+from firebase_admin import firestore
+
 @main_bp.route('/lost-items/<item_id>/approve', methods=['POST'])
 def approve_item(item_id):
     """
@@ -388,24 +378,12 @@ def approve_item(item_id):
     @return: JSON response indicating the result of the approval operation.
     """
     try:
-        # Find the lost item by ID
-        lost_item = mongo.db.lost_items.find_one({"_id": ObjectId(item_id)})
-
-        if not lost_item:
-            return jsonify({"error": "Lost item not found"}), 404
-
-        # Update the item to mark it as approved
-        result = mongo.db.lost_items.update_one(
-            {"_id": ObjectId(item_id)},
-            {"$set": {"is_approved": True}}
-        )
-
-        # Check if update was successful
-        if result.modified_count > 0:
+        # Use LostItemModel method to approve item
+        success = LostItemModel.approve_item(item_id)
+        if success:
             return jsonify({"message": "Item approved successfully"}), 200
         else:
-            return jsonify({"error": "Failed to approve item"}), 500
-
+            return jsonify({"error": "Lost item not found or already approved"}), 404
     except Exception as e:
         # Handle any exceptions that occur during the process
         return jsonify({"error": f"Error: {str(e)}"}), 500
@@ -424,9 +402,10 @@ def get_lost_items_admin():
 
     items = LostItemModel.get_lost_items_admin(limit=limit, skip=skip)
 
+    # Image URLs are already stored in image_path field (Firebase Storage URLs)
     for item in items:
         if "image_path" in item and item["image_path"]:
-            item["image"] = url_for('main.uploaded_file', filename=item["image_path"].split('/')[-1], _external=True)
+            item["image"] = item["image_path"]  # Use Firebase Storage URL directly
         else:
             item["image"] = None
 

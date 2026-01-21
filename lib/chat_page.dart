@@ -5,6 +5,8 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:khuje_nao/api_config.dart';
+import 'package:khuje_nao/api_service.dart';
 import 'dart:async'; //# For periodic updates
 
 /// The `ChatPage` widget provides the interface for real-time communication between users.
@@ -20,15 +22,16 @@ class ChatPageState extends State<ChatPage> {
 
   /// Secure storage for user data (e.g., email, receiver email).
   final STORAGE = const FlutterSecureStorage();
-
-  /// The server URL for API requests.
-  final base_url = 'https://alien-witty-monitor.ngrok-free.app';
+  final ApiService api_service = ApiService();
 
   /// The current user.
   late types.User user;
 
   /// The email of the person being messaged (receiver).
   String current_receiver = '';
+
+  /// Receiver's user details (name, email, NSU ID, phone)
+  Map<String, dynamic>? receiver_details;
 
   /// Loading indicator for the page.
   bool is_loading = true;
@@ -67,6 +70,9 @@ class ChatPageState extends State<ChatPage> {
           is_loading = false;
         });
 
+        // Fetch receiver's user details
+        await fetchReceiverDetails();
+
         loadMessages(); // Initial message load
         startMessageRefresh(); // Start periodic refresh
       } else {
@@ -77,6 +83,18 @@ class ChatPageState extends State<ChatPage> {
       setState(() {
         is_loading = false;
       });
+    }
+  }
+
+  /// Fetches the receiver's user details (name, email, NSU ID, phone)
+  Future<void> fetchReceiverDetails() async {
+    try {
+      final details = await api_service.getUserByEmail(current_receiver);
+      setState(() {
+        receiver_details = details;
+      });
+    } catch (e) {
+      print('Error fetching receiver details: $e');
     }
   }
 
@@ -119,7 +137,7 @@ class ChatPageState extends State<ChatPage> {
   Future<void> sendMessageToServer(types.TextMessage message) async {
     try {
       final response = await http.post(
-        Uri.parse('$base_url/send_message'),
+        Uri.parse(ApiConfig.getUrl(ApiConfig.sendMessage)),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'text': message.text,
@@ -141,7 +159,7 @@ class ChatPageState extends State<ChatPage> {
   Future<void> loadMessages() async {
     try {
       final response = await http.post(
-        Uri.parse('$base_url/get_messages'),
+        Uri.parse(ApiConfig.getUrl(ApiConfig.getMessages)),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'author_id': user.id,
@@ -171,6 +189,79 @@ class ChatPageState extends State<ChatPage> {
     }
   }
 
+  /// Shows a dialog with receiver's user details
+  void showReceiverDetailsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Contact Information'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (receiver_details != null) ...[
+                  if (receiver_details!['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.person, size: 20, color: Colors.grey[600]),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Name: ${receiver_details!['name']}')),
+                        ],
+                      ),
+                    ),
+                  if (receiver_details!['email'] != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.email, size: 20, color: Colors.grey[600]),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Email: ${receiver_details!['email']}')),
+                        ],
+                      ),
+                    ),
+                  if (receiver_details!['nsu_id'] != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.badge, size: 20, color: Colors.grey[600]),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('NSU ID: ${receiver_details!['nsu_id']}')),
+                        ],
+                      ),
+                    ),
+                  if (receiver_details!['phone_number'] != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.phone, size: 20, color: Colors.grey[600]),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Phone: ${receiver_details!['phone_number']}')),
+                        ],
+                      ),
+                    ),
+                ] else
+                  Text('Loading contact information...'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (is_loading) {
@@ -182,12 +273,53 @@ class ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with ' + current_receiver),
+        title: Text('Chat with ${receiver_details?['name'] ?? current_receiver.split('@').first}'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline),
+            onPressed: showReceiverDetailsDialog,
+            tooltip: 'View contact information',
+          ),
+        ],
       ),
-      body: Chat(
-        messages: messages,
-        onSendPressed: handleSendPressed,
-        user: user,
+      body: Column(
+        children: [
+          // Display receiver details at the top
+          if (receiver_details != null)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12),
+              color: Colors.blue.shade50,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Contact Information',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  SizedBox(height: 4),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 4,
+                    children: [
+                      if (receiver_details!['nsu_id'] != null)
+                        Text('NSU ID: ${receiver_details!['nsu_id']}', style: TextStyle(fontSize: 12)),
+                      if (receiver_details!['phone_number'] != null)
+                        Text('Phone: ${receiver_details!['phone_number']}', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          // Chat interface
+          Expanded(
+            child: Chat(
+              messages: messages,
+              onSendPressed: handleSendPressed,
+              user: user,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from firebase_admin import auth as fb_auth, credentials, initialize_app, get_app
-from . import mongo
+from firebase_admin import auth as fb_auth, credentials, initialize_app, get_app, firestore
+from .models import UserModel
 import os
 import base64
 import json
@@ -67,17 +67,22 @@ def firebase_google_login():
         if not email:
             return jsonify({'error': 'Email not present in token'}), 400
 
-        # Upsert user profile in Mongo by Firebase uid or email
-        profile = mongo.db.users.find_one({'firebase_uid': uid}) or mongo.db.users.find_one({'email': email})
+        # Upsert user profile in Firestore by Firebase uid or email
+        profile = UserModel.get_user_by_firebase_uid(uid) or UserModel.get_user_by_email(email)
         if not profile:
-            mongo.db.users.insert_one({
+            # Create new user profile
+            db = firestore.client()
+            user_ref = db.collection('users').document()
+            user_ref.set({
                 'firebase_uid': uid,
                 'email': email,
                 'profile_complete': False,
             })
         else:
-            # ensure uid is saved
-            mongo.db.users.update_one({'_id': profile['_id']}, {'$set': {'firebase_uid': uid}})
+            # Ensure uid is saved
+            user_id = profile.get('_id')
+            if user_id:
+                UserModel.update_user(user_id, {'firebase_uid': uid})
 
         return jsonify({'message': 'Token verified', 'uid': uid, 'email': email}), 200
     except Exception as e:
@@ -92,11 +97,14 @@ def profile():
     uid = decoded.get('uid')
     email = decoded.get('email')
     if request.method == 'GET':
-        profile = mongo.db.users.find_one({'firebase_uid': uid}) or mongo.db.users.find_one({'email': email})
+        profile = UserModel.get_user_by_firebase_uid(uid) or UserModel.get_user_by_email(email)
         if not profile:
             return jsonify({'email': email, 'profile_complete': False}), 200
-        profile['_id'] = str(profile['_id'])
-        return jsonify({k: v for k, v in profile.items() if k != 'password'}), 200
+        # Remove password from response and ensure _id is string
+        profile = {k: v for k, v in profile.items() if k != 'password'}
+        if '_id' in profile:
+            profile['_id'] = str(profile['_id'])
+        return jsonify(profile), 200
 
     # POST
     data = request.get_json(silent=True) or {}
@@ -114,11 +122,55 @@ def profile():
         'firebase_uid': uid,
         'email': email,
     }
-    mongo.db.users.update_one(
-        {'$or': [{'firebase_uid': uid}, {'email': email}]},
-        {'$set': update},
-        upsert=True,
-    )
+    
+    # Find existing user or create new one
+    profile = UserModel.get_user_by_firebase_uid(uid) or UserModel.get_user_by_email(email)
+    if profile and profile.get('_id'):
+        # Update existing user
+        UserModel.update_user(profile['_id'], update)
+    else:
+        # Create new user
+        db = firestore.client()
+        user_ref = db.collection('users').document()
+        user_ref.set(update)
+    
     return jsonify({'message': 'Profile saved'}), 200
 
+
+@auth_bp.route('/check-user-exists', methods=['POST'])
+def check_user_exists():
+    """
+    Check if a user exists by email.
+    
+    Expects JSON body with 'email' field.
+    Returns: {'exists': bool}
+    """
+    _ensure_firebase_admin()
+    body = request.get_json(silent=True) or {}
+    email = body.get('email')
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+    
+    profile = UserModel.get_user_by_email(email)
+    return jsonify({'exists': profile is not None}), 200
+
+
+@auth_bp.route('/user-by-email/<email>', methods=['GET'])
+def get_user_by_email(email):
+    """
+    Get user details by email.
+    
+    Returns user profile without password field.
+    Returns 404 if user doesn't exist.
+    """
+    _ensure_firebase_admin()
+    profile = UserModel.get_user_by_email(email)
+    if not profile:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Remove password and ensure _id is string
+    profile = {k: v for k, v in profile.items() if k != 'password'}
+    if '_id' in profile:
+        profile['_id'] = str(profile['_id'])
+    return jsonify(profile), 200
 

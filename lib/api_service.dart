@@ -2,12 +2,10 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:khuje_nao/api_config.dart';
 
 /// A service class to handle API calls for user authentication, lost items, and email-related tasks.
 class ApiService {
-  /// Base URL for the backend API.
-  final String base_url = 'https://alien-witty-monitor.ngrok-free.app'; // Replace with your backend URL
-
   /// Instance of [FlutterSecureStorage] to store secure data like tokens.
   final STORAGE = const FlutterSecureStorage();
 
@@ -48,7 +46,7 @@ class ApiService {
     try {
       // Sending signup request to the server
       final response = await http.post(
-        Uri.parse('$base_url/signup'),
+        Uri.parse(ApiConfig.getUrl(ApiConfig.signup)),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "name": name,
@@ -90,7 +88,7 @@ class ApiService {
 
     try {
       final response = await http.post(
-        Uri.parse('$base_url/login'),
+        Uri.parse(ApiConfig.getUrl(ApiConfig.login)),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": email,
@@ -133,7 +131,7 @@ class ApiService {
         print('Email not found.');
         return false;
       }
-      var request = http.MultipartRequest('POST', Uri.parse('$base_url/lost-items'));
+      var request = http.MultipartRequest('POST', Uri.parse(ApiConfig.getUrl(ApiConfig.lostItems)));
       request.fields['description'] = description;
       request.fields['location'] = location;
       request.fields['reported_by'] = email;
@@ -151,7 +149,7 @@ class ApiService {
   Future<void> markItemAsFound(String itemId) async {
     try {
       final response = await http.post(
-        Uri.parse('$base_url/lost-items/$itemId/found'),
+        Uri.parse(ApiConfig.getFoundUrl(itemId)),
       );
 
       if (response.statusCode == 200) {
@@ -173,7 +171,7 @@ class ApiService {
     required String query,
   }) async {
     try {
-      final response = await http.get(Uri.parse('$base_url/search-lost-items?query=$query'));
+      final response = await http.get(Uri.parse('${ApiConfig.getUrl(ApiConfig.searchLostItems)}?query=$query'));
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
       } else {
@@ -191,7 +189,7 @@ class ApiService {
   /// Verifies a Firebase Google ID token with the backend for secure login.
   Future<bool> firebaseGoogleLogin(String idToken) async {
     final response = await http.post(
-      Uri.parse('$base_url/firebase-google-login'), // Backend endpoint must verify the token
+      Uri.parse(ApiConfig.getUrl(ApiConfig.firebaseGoogleLogin)),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'idToken': idToken}),
     );
@@ -210,7 +208,7 @@ class ApiService {
     required String phone,
   }) async {
     final res = await http.post(
-      Uri.parse('$base_url/profile'),
+      Uri.parse(ApiConfig.getUrl(ApiConfig.profile)),
       headers: _headers(token),
       body: jsonEncode({'name': name, 'nsu_id': nsuId, 'phone': phone}),
     );
@@ -220,11 +218,48 @@ class ApiService {
   // Optional: fetch profile to prefill name/NSU if it already exists
   Future<Map<String, dynamic>?> getProfile(String token) async {
     final res = await http.get(
-      Uri.parse('$base_url/profile'),
+      Uri.parse(ApiConfig.getUrl(ApiConfig.profile)),
       headers: _headers(token),
     );
     if (res.statusCode == 200) return jsonDecode(res.body);
     return null;
+  }
+
+  /// Check if a user exists by email.
+  /// Returns true if user exists, false otherwise.
+  Future<bool> checkUserExists(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.getUrl(ApiConfig.checkUserExists)),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['exists'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking user existence: $e');
+      return false;
+    }
+  }
+
+  /// Get user details by email (for chat display).
+  /// Returns user profile or null if not found.
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    try {
+      final response = await http.get(
+        Uri.parse(ApiConfig.getUserByEmailUrl(email)),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting user by email: $e');
+      return null;
+    }
   }
 
 }

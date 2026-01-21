@@ -7,9 +7,10 @@ import 'package:khuje_nao/main.dart';
 import 'api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:khuje_nao/profile_completion_screen.dart';
 
-/// `LoginScreen` handles user login and Google sign-in.
-/// It supports remembering credentials and navigating on success.
+/// `LoginScreen` handles user login via Google Sign-In only.
+/// Users must select their @northsouth.edu Google account to sign in.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -21,24 +22,14 @@ class LoginScreenState extends State<LoginScreen> {
   /// The `ApiService` instance used to interact with the backend.
   final ApiService api_service = ApiService();
 
-  /// The global key used for form validation.
-  final form_key = GlobalKey<FormState>();
-
   /// Secure storage used to persist sensitive data, such as email and language preference.
   final STORAGE = const FlutterSecureStorage();
 
   /// The currently selected language (default is English).
   String language = 'en';
 
-  /// The email entered by the user.
-  String email = '';
-
-  /// The password entered by the user.
-  String password = '';
-
-  /// Tracks whether the "Remember Me" checkbox is selected.
-  bool remember_me = false;
-
+  /// Loading state for Google Sign-In
+  bool is_loading = false;
 
   @override
   void initState() {
@@ -89,50 +80,43 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // OTP flow removed
+  /// Handles Google Sign-In for login.
+  /// Checks if user exists in database, if yes - logs in, if no - shows error to sign up.
+  Future<void> signInWithGoogle() async {
+    setState(() {
+      is_loading = true;
+    });
 
-  /// Handles user login.
-  ///
-  /// This method validates the form, checks if the user is an admin,
-  /// sends a request to log in, and displays the appropriate response dialogs.
-  Future<void> login() async {
-    if (form_key.currentState!.validate()) {
-      if (email.compareTo('Admin') == 0 && password.compareTo('Admin') == 0) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminPage()),
-        );
+    try {
+      // Show account picker (all Google accounts on device)
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        setState(() {
+          is_loading = false;
+        });
+        return; // User cancelled
+      }
+
+      final email = googleUser.email;
+      if (email == null || !email.endsWith('@northsouth.edu')) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("Only @northsouth.edu email accounts are allowed. Please select your North South University account.");
         return;
       }
-      int response = await api_service.login(email, password);
-      switch (response) {
-        case -1:
-          showResponseDialog(AppLocalization.getString(language, "invalid_mail"));
-          break;
-        case -2:
-          showResponseDialog(AppLocalization.getString(language, "invalid_pass"));
-          break;
-        case -9:
-          showResponseDialog(AppLocalization.getString(language, "login_failed"));
-          break;
-        case 0:
-          if (remember_me) {
-            await STORAGE.write(key: 'email', value: email); // Save email securely
-          }
-          // OTP removed; navigate directly
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ActivityFeedPage()),
-          );
-          break;
-      }
-    }
-  }
 
-  Future<void> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // Cancelled
+      // Check if user exists in database
+      final userExists = await api_service.checkUserExists(email);
+      if (!userExists) {
+        setState(() {
+          is_loading = false;
+        });
+        showResponseDialog("Account does not exist. Please sign up first.");
+        return;
+      }
+
+      // User exists - proceed with Firebase authentication
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -141,16 +125,53 @@ class LoginScreenState extends State<LoginScreen> {
       final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final idToken = await userCredential.user?.getIdToken();
       if (idToken == null) {
+        setState(() {
+          is_loading = false;
+        });
         showResponseDialog("Google sign-in failed: No ID token.");
         return;
       }
+
+      // Verify with backend
       final response = await api_service.firebaseGoogleLogin(idToken);
-      if (response) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ActivityFeedPage()));
-      } else {
+      if (!response) {
+        setState(() {
+          is_loading = false;
+        });
         showResponseDialog("Google Sign-In backend verification failed.");
+        return;
+      }
+
+      // Check if profile is complete
+      final profile = await api_service.getProfile(idToken);
+      final isProfileComplete = profile != null && profile['profile_complete'] == true;
+
+      // Store email for session
+      await STORAGE.write(key: 'email', value: email);
+
+      setState(() {
+        is_loading = false;
+      });
+
+      if (!isProfileComplete) {
+        // Redirect to profile completion screen
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileCompletionScreen(idToken: idToken)),
+        );
+        if (result == true && mounted) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ActivityFeedPage()));
+        }
+      } else {
+        // Navigate to activity feed
+        if (mounted) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ActivityFeedPage()));
+        }
       }
     } catch (e) {
+      setState(() {
+        is_loading = false;
+      });
       showResponseDialog("Google Sign-In error: $e");
     }
   }
@@ -167,46 +188,44 @@ class LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      body: Form(
-        key: form_key,
+      body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "email")),
-                keyboardType: TextInputType.emailAddress,
-                onChanged: (value) => setState(() => email = value),
-                initialValue: email, // Prepopulate if saved
+              Icon(
+                Icons.account_circle,
+                size: 80,
+                color: Colors.blue,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalization.getString(language, "password")),
-                obscureText: true,
-                onChanged: (value) => setState(() => password = value),
-                initialValue: password, // Prepopulate if saved
+              const SizedBox(height: 24),
+              Text(
+                'Sign in with your\nNorth South University account',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 10),
-              CheckboxListTile(
-                title: Text(AppLocalization.getString(language, "remember_me")),
-                value: remember_me,
-                onChanged: (bool? value) {
-                  setState(() {
-                    remember_me = value ?? false;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
+              const SizedBox(height: 8),
+              Text(
+                'Select your @northsouth.edu Google account',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
               ),
-              const SizedBox(height: 20),
-              // Google Sign-In button
-              ElevatedButton(
-                onPressed: signInWithGoogle,
-                child: const Text("Sign in with Google"),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: login,
-                child: Text(AppLocalization.getString(language, "login")),
-              ),
+              const SizedBox(height: 48),
+              if (is_loading)
+                const CircularProgressIndicator()
+              else
+                ElevatedButton.icon(
+                  onPressed: signInWithGoogle,
+                  icon: const Icon(Icons.login),
+                  label: const Text("Sign in with Google"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                ),
             ],
           ),
         ),

@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:khuje_nao/api_service.dart';
+import 'package:khuje_nao/api_config.dart';
 import 'package:khuje_nao/report_lost_item_screen.dart';
 import 'package:khuje_nao/search_lost_item_screen.dart';
 import 'package:khuje_nao/login_screen.dart';
@@ -29,7 +30,6 @@ class ActivityFeedPage extends StatefulWidget {
 /// The state for [ActivityFeedPage] that manages the feed data and user interactions.
 class ActivityFeedPageState extends State<ActivityFeedPage> {
   final FlutterSecureStorage STORAGE = const FlutterSecureStorage();
-  final String base_url = 'https://alien-witty-monitor.ngrok-free.app';
   List<Map<String, dynamic>> lost_items = [];
   List<Map<String, dynamic>> found_items = [];
   List<GlobalKey> lost_item_keys = []; // List of keys for lost items
@@ -60,9 +60,9 @@ class ActivityFeedPageState extends State<ActivityFeedPage> {
       });
 
       final lostItemsResponse =
-      await http.get(Uri.parse('$base_url/lost-items'));
+      await http.get(Uri.parse(ApiConfig.getUrl(ApiConfig.lostItems)));
       final foundItemsResponse =
-      await http.get(Uri.parse('$base_url/found-items'));
+      await http.get(Uri.parse(ApiConfig.getUrl(ApiConfig.foundItems)));
 
       if (lostItemsResponse.statusCode == 200 &&
           foundItemsResponse.statusCode == 200) {

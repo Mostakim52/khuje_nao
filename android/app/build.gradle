@@ -11,7 +11,7 @@ plugins {
 android {
     namespace = "com.example.khuje_nao"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion "25.1.8937393"
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -27,10 +27,15 @@ android {
         applicationId = "com.example.khuje_nao"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Configure NDK debug symbol handling
+        ndk {
+            debugSymbolLevel 'NONE'
+        }
     }
 
     buildTypes {
@@ -38,7 +43,32 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+            // Disable debug symbol stripping to prevent build errors
+            ndk {
+                debugSymbolLevel 'NONE'
+            }
         }
+    }
+
+    // Disable native library symbol stripping to prevent build errors
+    tasks.whenTaskAdded { task ->
+        if (task.name.contains("strip")) {
+            task.enabled = false
+        }
+    }
+
+    packaging {
+        // Handle native library packaging
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+}
+
+// Disable symbol stripping tasks to prevent build errors
+afterEvaluate {
+    tasks.findAll { it.name.contains("strip") || it.name.contains("Strip") }.each {
+        it.enabled = false
     }
 }
 

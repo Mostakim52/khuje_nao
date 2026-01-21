@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:khuje_nao/chat_page.dart'; // ChatPage is the actual chat page widget
+import 'package:khuje_nao/api_config.dart';
 
 /// `ChatPageList` is a StatefulWidget that displays a list of ongoing chats for the current user.
 /// It fetches the list of chats from the backend and navigates to the `ChatPage` when a chat is tapped.
@@ -15,9 +16,6 @@ class ChatPageListState extends State<ChatPageList> {
   /// Secure storage used to persist data such as the user's email.
   late FlutterSecureStorage STORAGE = const FlutterSecureStorage();
   http.Client http_client = http.Client();
-
-  /// The server URL for API requests.
-  final base_url = 'https://alien-witty-monitor.ngrok-free.app';
 
   /// List to hold the ongoing chats fetched from the server.
   List<Map<String, dynamic>> chats = [];
@@ -53,7 +51,7 @@ class ChatPageListState extends State<ChatPageList> {
       if (email != null) {
         curren_user_email = email;
         final response = await http.post(
-          Uri.parse('$base_url/get_chats'),
+          Uri.parse(ApiConfig.getUrl(ApiConfig.getChats)),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'user_id': email}),
         );

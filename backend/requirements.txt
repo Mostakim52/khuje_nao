@@ -1,10 +1,9 @@
 Flask
-Flask-PyMongo
 Flask-CORS
 python-dotenv
 bcrypt
-pymongo
 werkzeug
 gunicorn
 firebase-admin
 PyJWT
+google-cloud-firestore
